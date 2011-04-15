@@ -27,14 +27,15 @@ import time
 lbm = ClassLBM("makeQuarterCircle")
 
 #plotting
-x, y = np.mgrid[0:lbm.Nx:1,0:lbm.Ny:1]
 fig = mlab.figure(size = (1000,1000))
-s = mlab.surf(x, y, lbm.rho_H)
-
+data = mlab.pipeline.array2d_source(lbm.X,lbm.Y,lbm.rho_H)
+s = mlab.pipeline.surface(data)
+mlab.pipeline.surface(mlab.pipeline.extract_edges(data),
+                            color=(0, 0, 0),line_width = 0.1)
 
 t0 = time.clock()
 
-for i in range(10):
+for i in range(1000):
     lbm.runSimStep()
     
     s.mlab_source.scalars = lbm.rho_H

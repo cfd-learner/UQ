@@ -17,18 +17,14 @@ class Setup:
     mu = 1.86e-5    #dynamic viscosity
     Pr = 0.71       #Prandtl number
     
-    RKMETHOD = 1
-    FMETHOD = 1
+    RKMETHOD = 0
+    FMETHOD = 0
     CFL = 0.5
     dtau = 0.0
     tt_tref = 0.0
     tt_time = 0.0
     steps = 1000
     tol = 0.0
-    dx = 0.0
-    dy = 0.0
-    Lx = 0.0
-    Ly = 0.0
     periodicX = 0
     periodicY = 0
     mirrorNorth = 1
@@ -61,15 +57,19 @@ class Setup:
         
         multi = 2.0
         
-        self.Nx = 100     #number of elements in X
-        self.Ny = int(ceil(multi*self.Nx))
+        self.Nx = 20     #number of elements in X
+        self.Ny = 100     #number of elements in Y
         
         self.Lx = 0.5    #length of domain in X
+        self.Ly = self.Lx*multi #length of domain in y
         
-        self.dx = self.Lx/(self.Nx-1)
-        self.dy = self.dx
+        #uniform spacing
+        dx_ = self.Lx/self.Nx
+        dy_ = self.Ly/self.Ny
         
-        self.Ly = (self.Ny - 1)*self.dy     #length of domain in y
+        self.dx = dx_*ones((self.Nx),dtype=float64)
+        self.dy = dy_*ones((self.Ny),dtype=float64)
+        
         
         ##########################
         ## setup circle
@@ -79,20 +79,29 @@ class Setup:
         B = zeros((self.Nx, self.Ny))
         self.bnd = zeros((self.Nx, self.Ny),dtype=uint32)
         
+        x_ = -self.dx[0]/2.0
+        y_ = -self.dy[0]/2.0
+        
+        self.X = zeros((self.Nx),dtype=float64)
+        self.Y = zeros((self.Ny),dtype=float64)
+        
         for x in range(self.Nx):
-            x_ = x *self.dx
+            x_ += self.dx[x]
+            y_ = -self.dy[0]/2.0
+            self.X[x] = x_
             for y in range(self.Ny):
-                y_ = (y - self.Ny)*self.dy
+                y_ += self.dy[y]
                 B[x,y] = linalg.norm([x_,y_])
+                self.Y[y] = y_
                 if B[x,y] < r:
                     self.bnd[x,y] = 1
                     
         
         #add solid block
-        midX = floor(self.Nx/2)
-        midY = floor(self.Ny/2)
-        size = 3
-        self.bnd[(midX-size):(midX+size),(midX-size):(midX+size)] = 2
+        #midX = floor(self.Nx/2)
+        #midY = floor(self.Ny/2)
+        #size = 3
+        #self.bnd[(midX-size):(midX+size),(midX-size):(midX+size)] = 2
         
         ## VALUES FOR CIRCLE
         

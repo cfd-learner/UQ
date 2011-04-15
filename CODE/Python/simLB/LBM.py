@@ -87,6 +87,8 @@ class ClassLBM:
         self.Ly = simSetup.Ly
         self.dx = simSetup.dx
         self.dy = simSetup.dy
+        self.X = simSetup.X
+        self.Y = simSetup.Y
         
         self.R = simSetup.R       #gas constant J/kgK
         self.gamma = simSetup.gamma      # ratio of specific heats
@@ -132,9 +134,9 @@ class ClassLBM:
         ##########################
         ## PLOTTING
         
-        if 1:
-            plt.contour(self.bnd)
-            plt.show()
+
+        #plt.contour(self.bnd)
+        #plt.show()
         
         
         ##########################
@@ -147,8 +149,8 @@ class ClassLBM:
         ## INITIALISE DIST. FUNCTIONS
         self.initFunctions()
         
-        plt.contour(self.rho_H)
-        plt.show()
+        #plt.contour(self.rho_H)
+        #plt.show()
         
         # and you're good to go!
     
@@ -157,21 +159,6 @@ class ClassLBM:
         refine the input variables so that all required fields are populated
         with correct data
         """
-        
-        # define dx & dy based upon what has been supplied
-        
-        if self.dx == 0:
-            self.dx = self.Lx / float((slef.Nx - 1))
-        else:
-            self.Lx = self.dx*(self.Nx - 1)
-        
-        if (self.dy == 0.0) & (self.Ly != 0.0):
-            self.dy = self.Ly / float(self.Ny - 1)
-        elif (self.dy == 0.0) & (self.Ly == 0.0):
-            self.dy = self.dx
-            self.Ly = self.dy*(self.Ny - 1)
-        else:
-            self.Ly = self.dy*(self.Ny - 1)
         
         # define reference values
         if self.rho_ref == 0.0:
@@ -216,7 +203,7 @@ class ClassLBM:
         # stability requirements
         
         if self.dt == 0:
-            self.dt = self.CFL * min(self.dx, self.dy) / np.max(self.ex)
+            self.dt = self.CFL * min(np.min(self.dx), np.min(self.dy)) / np.max(self.ex)
         else:
             self.dt = self.dtau * self.tau_ref
         
@@ -296,6 +283,9 @@ class ClassLBM:
         self.f_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.f_H)
         self.h_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.h_H)
         
+        self.dx_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.dx)
+        self.dy_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.dy)
+        
         self.rho_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.rho_H)
         self.ux_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.ux_H)
         self.uy_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.uy_H)
@@ -345,8 +335,8 @@ class ClassLBM:
         ## PACK DICTIONARY
         
         input = {'Nx':self.Nx,'Ny':self.Ny,'Ni':self.Ni,'R':self.R,'K':self.K,\
-                 'b':self.b,'Tc':self.Tc,'dt':self.dt,'dx':self.dx,\
-                 'dy':self.dy,'periodicX':self.periodicX,\
+                 'b':self.b,'Tc':self.Tc,'dt':self.dt,\
+                 'periodicX':self.periodicX,\
                  'periodicY':self.periodicY,'mirrorN':self.mirrorNorth,\
                  'mirrorS':self.mirrorSouth,'mirrorE':self.mirrorEast,\
                  'mirrorW':self.mirrorWest,'FMETHOD':self.FMETHOD,\
@@ -356,7 +346,7 @@ class ClassLBM:
         ##########################
         ## GENERATE ENTIRE OPENCL CODE HERE
         import codeCL
-        name = codeCL.genOpenCL(input,self.ex,self.ey)
+        name = codeCL.genOpenCL(input,self.ex,self.ey, self.dx, self.dy)
         f = open(name,'r')
         fstr = "".join(f.readlines())
         f.close()
@@ -496,4 +486,4 @@ class ClassLBM:
                 self.RK1()
             elif self.RKMETHOD == 1:
                 self.RK3()
-            
+      
