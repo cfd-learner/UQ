@@ -17,8 +17,8 @@ class Setup:
     mu = 1.86e-5    #dynamic viscosity
     Pr = 0.71       #Prandtl number
     
-    RKMETHOD = 0
-    FMETHOD = 0
+    RKMETHOD = 1
+    FMETHOD = 1
     CFL = 0.5
     dtau = 0.0
     tt_tref = 0.0
@@ -55,9 +55,9 @@ class Setup:
         ##########################
         ## domain definition
         
-        multi = 2.0
+        multi = 1.0
         
-        self.Nx = 20     #number of elements in X
+        self.Nx = 100     #number of elements in X
         self.Ny = 100     #number of elements in Y
         
         self.Lx = 0.5    #length of domain in X

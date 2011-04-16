@@ -18,7 +18,8 @@ def genOpenCL(input,ex,ey,dx,dy):
     f = open(fileName,'wt')
     f.write('// {}\n\n'.format(fileName))
     #f.write('#pragma OPENCL EXTENSION cl_amd_printf : enable \n')
-    f.write('#pragma OPENCL EXTENSION cl_amd_fp64 : enable \n\n')
+    #f.write('#pragma OPENCL EXTENSION cl_amd_fp64 : enable \n\n')
+    f.write('#pragma OPENCL EXTENSION cl_khr_fp64 : enable \n\n')
             
     #f.write('#pragma OPENCL EXTENSION cl_intel_printf : enable \n')
     #f.write('#pragma OPENCL EXTENSION cl_intel_fp64 : enable \n\n')
@@ -116,40 +117,62 @@ def genOpenCL(input,ex,ey,dx,dy):
     
     f.write('double f0(double rho, double u, double v, double T)\n{\n')
     f.write('   //rest particle equilibrium function\n')
-    f.write('    return (rho/4.0)*(4 + 10*pow(T,2) + pow(u,4) - 5*pow(v,2) + pow(v,4) + 10*T*(-1 + pow(u,2) + pow(v,2)) + pow(u,2)*(-5 + 4*pow(v,2)));\n}\n\n')
+    f.write('    return (rho/4.0)*(4.0 + 10.0*T*T + u*u*u*u - 5.0*v*v + v*v*v*v + 10.0*T*(-1.0 + u*u + v*v) + u*u*(-5.0 + 4*v*v));\n}\n\n')
     
     f.write('double f1(double rho, double u, double v, double T)\n{ \n')
-    f.write('    return (rho/6.0)*(-6*pow(T,2) - u*(1 + u)*(-4 + pow(u,2) + 3*pow(v,2)) - T*(-4 + 6*u + 9*pow(u,2) + 3*pow(v,2)));\n}\n\n')
+    f.write('    return (rho/6.0)*(-6.0*T*T - u*(1.0 + u)*(-4.0 + u*u + 3.0*v*v) - T*(-4.0 + 6.0*u + 9.0*u*u + 3.0*v*v));\n}\n\n')
     
     f.write('double f5(double rho, double u, double v, double T)\n{\n')
-    f.write('    return (rho/4.0)*((T + u + pow(u,2))*(T + v + pow(v,2)));\n}\n\n')
+    f.write('    return (rho/4.0)*((T + u + u*u)*(T + v + v*v));\n}\n\n')
     
     f.write('double f9(double rho, double u, double v, double T)\n{\n')
-    f.write('    return (rho/24.0)*(3*pow(T,2) + (-1 + u)*u*(1 + u)*(2 + u) + T*(-1 + 6*u*(1 + u)));\n}\n\n')
+    f.write('    return (rho/24.0)*(3.0*T*T + (-1.0 + u)*u*(1.0 + u)*(2.0 + u) + T*(-1.0 + 6.0*u*(1.0 + u)));\n}\n\n')
     
     f.write('// equilibrium functions for h\n\n')
     
     f.write('double h0(double T, double u, double v)\n{\n')
-    f.write('return (10*(16 + 3*K)*pow(T,3) + 3*T*(8 + 4*K - 40*pow(u,2) - 5*K*pow(u,2) + 20*pow(u,4)\n')
-    f.write('    + K*pow(u,4) + (-5*(8 + K) + 4*(15 + K)*pow(u,2))*pow(v,2) + (20 + K)*pow(v,4))\n')
-    f.write('    + 30*pow(T,2)*(-4 + 9*pow(u,2) + 9*pow(v,2) + K*(-1 + pow(u,2) + pow(v,2)))\n')
-    f.write('    + 3*(pow(u,2) + pow(v,2))*(4 + pow(u,4) - 5*pow(v,2) + pow(v,4) + pow(u,2)*(-5 + 4*pow(v,2))))/24.0;\n}\n\n')
+    f.write('    double A = (24.0 + 12.0*K - 120.0*T - 30.0*K*T + 160.0*T*T + 30.0*K*T*T)*T;\n')
+    f.write('    double B = 12.0 - T*(120.0 + 15.0*K - 270.0*T - 30.0*K*T);\n')
+    f.write('    double C = -15.0 + T*(60.0 + 3.0*K);\n')
+    f.write('    double D = -30.0 + T*(180.0 + 12.0*K);\n')
+    f.write('return A + B*(u*u + v*v) + C*(u*u*u*u+v*v*v*v) + D*u*u*v*v + 3.0*(u*u + v*v)*(u*u*u*u + 4.0*u*u*v*v + v*v*v*v);\n}\n\n')
     
     f.write('double h1(double T, double u, double v)\n{\n')
-    f.write('    return (-2*(16 + 3*K)*pow(T,3) - u*(1 + u)*(pow(u,2) + pow(v,2))*(-4 + pow(u,2) + 3*pow(v,2))\n')
-    f.write('           - T*(u*(-4*(4 + K) - 4*(7 + K)*u + (14 + K)*pow(u,2) + (19 + K)*pow(u,3)) + (-4 + 3*u*(10\n')
-    f.write('            + K + (14 + K)*u))*pow(v,2) + 3*pow(v,4)) - pow(T,2)*(-16 + 6*u*(6 + 13*u) + 30*pow(v,2)\n')
-    f.write('            + K*(-4 + 6*u + 9*pow(u,2) + 3*pow(v,2))))/12.0;\n}\n\n')
+    f.write('    double A = (16.0 + 4.0*K - 32.0*T - 6.0*K*T)*T*T;\n')
+    f.write('    double B = (16.0 + 4.0*K - 36.0*T - 6.0*K*T)*T;\n')
+    f.write('    double C = (28.0 + 4.0*K - 78.0*T - 9.0*K*T)*T;\n')
+    f.write('    double D = (4.0 - 30.0*T - 3.0*K*T)*T;\n')
+    f.write('    double E = 4.0 - T*(14.0 + K);\n')
+    f.write('    double F = 4.0 - T*(30.0 + 3.0*K);\n')
+    f.write('    double G = E - 5.0*T;\n')
+    f.write('    double H = F - 12.0*T;\n')
+    f.write('    double I = -3.0*T;\n')
+    f.write('return A + B*u + C*u*u + D*v*v + E*u*u*u + F*u*v*v + G*u*u*u*u + H*u*u*v*v + I*v*v*v*v - u*(u + 1.0)*(u*u + 3.0*v*v)*(u*u + v*v);\n}\n\n')
+
     
     f.write('double h5(double T, double u, double v)\n{\n')
-    f.write('    return ((16 + 3*K)*pow(T,3) + 3*u*(1 + u)*v*(1 + v)*(pow(u,2) + pow(v,2)) + 3*pow(T,2)*((6 + K)*u\n')
-    f.write('            + (9 + K)*pow(u,2) + v*(6 + K + (9 + K)*v)) + 3*T*(pow(u,3) + pow(u,4) + pow(v,3)*(1 + v)\n')
-    f.write('            + u*v*(6 + K + (9 + K)*v) + pow(u,2)*v*(9 + K + (12 + K)*v)))/24.0;\n}\n\n')
+    f.write('    double A = (16.0 + 3.0*K)*T*T*T;\n')
+    f.write('    double B = (18.0 + 3.0*K)*T*T;\n')
+    f.write('    double C = (27.0 + 3.0*K)*T*T;\n')
+    f.write('    double D = (18.0 + 3.0*K)*T;\n')
+    f.write('    double E = 3.0*T;\n')
+    f.write('    double F = (27.0 + 3.0*K)*T;\n')
+    f.write('    double G = F + 9.0*T;\n')
+
+    f.write('    return A + B*(u + v) + C*(u*u + v*v) + D*u*v + E*(u*u*u + v*v*v + u*u*u*u + v*v*v*v) + F*(u*u*v + u*v*v) + G*u*u*v*v + 3.0*u*v*(v+1.0)*(u+1.0)*(u*u + v*v);\n}\n\n')
+
     
     f.write('double h9(double T, double u, double v)\n{\n')
-    f.write('    return ((16 + 3*K)*pow(T,3) + T*u*(-8 + K*(-1 + u)*(1 + u)*(2 + u) + u*(-7 + 2*u*(11 + 8*u)))\n')
-    f.write('            + T*(-1 + 6*u*(1 + u))*pow(v,2) + (-1 + u)*u*(1 + u)*(2 + u)*(pow(u,2) + pow(v,2))\n')
-    f.write('            + pow(T,2)*(-4 + 36*u + 51*pow(u,2) + K*(-1 + 6*u*(1 + u)) + 3*pow(v,2)))/48.0;\n}\n\n')
+    f.write('    double A = (-4.0 - K + 16.0*T + 3.0*K*T)*T*T;\n')
+    f.write('    double B = (-8.0 - 2.0*K + 36.0*T + 6.0*K*T)*T;\n')
+    f.write('    double C = (-7.0 - K + 51.0*T + 6.0*K*T)*T;\n')
+    f.write('    double D = T*(3.0*T - 1.0);\n')
+    f.write('    double E = -2.0 + T*(22.0 + 2.0*K);\n')
+    f.write('    double F = -2.0 + 6.0*T;\n')
+    f.write('    double G = -1.0 + T*(16.0 + K);\n')
+    f.write('    double H = F + 1.0;\n')
+
+    f.write('    return A + B*u + C*u*u + D*v*v + E*u*u*u + F*u*v*v +  G*u*u*u*u + H*u*u*v*v + u*u*u*(u + 2)*(u*u + v*v);\n}\n\n')
     
     f.write('////////////////////////////////////////////////////////////////////////////////\n')
     f.write('// clEq2D\n')
@@ -158,13 +181,14 @@ def genOpenCL(input,ex,ey,dx,dy):
     f.write('int clEq2D(double rho, double u_, double v_, double T_, double* eqf, double* eqh)\n{\n')
     f.write('    //returns the equilibrium values for each velocity vector given the current\n')
     f.write('    // macroscopic values and the corresponding reference quantities\n\n')
-    #f.write('    double sRTc = sqrt(R*Tc);\n')
+    
     RTc = input['R']*input['Tc']
     sRTc = sqrt(RTc)
+    
     f.write('    double u = u_/{};\n'.format(sRTc))
     f.write('    double v = v_/{};\n'.format(sRTc))
     f.write('    double T = T_/Tc;\n\n')
-    
+    #
     f.write('    eqf[0] = f0(rho,u,v,T);\n')
     f.write('    eqf[1] = f1(rho,u,v,T);\n')
     f.write('    eqf[2] = f1(rho,v,u,T);\n')
@@ -178,22 +202,22 @@ def genOpenCL(input,ex,ey,dx,dy):
     f.write('    eqf[10] = f9(rho,v,u,T);\n')
     f.write('    eqf[11] = f9(rho,-u,v,T);\n')
     f.write('    eqf[12] = f9(rho,-v,u,T);\n\n')
-    
+    #
     f.write('    double rRTc = rho*{};\n\n'.format(RTc))
-    
-    f.write('    eqh[0] = rRTc*h0(T,u,v);\n')
-    f.write('    eqh[1] = rRTc*h1(T,u,v);\n')
-    f.write('    eqh[2] = rRTc*h1(T,v,u);\n')
-    f.write('    eqh[3] = rRTc*h1(T,-u,v);\n')
-    f.write('    eqh[4] = rRTc*h1(T,-v,u);\n')
-    f.write('    eqh[5] = rRTc*h5(T,u,v);\n')
-    f.write('    eqh[6] = rRTc*h5(T,-u,v);\n')
-    f.write('    eqh[7] = rRTc*h5(T,-u,-v);\n')
-    f.write('    eqh[8] = rRTc*h5(T,u,-v);\n')
-    f.write('    eqh[9] = rRTc*h9(T,u,v);\n')
-    f.write('    eqh[10] =rRTc*h9(T,v,u);\n')
-    f.write('    eqh[11] =rRTc*h9(T,-u,v);\n')
-    f.write('    eqh[12] =rRTc*h9(T,-v,u);\n\n')
+    #
+    f.write('    eqh[0] = rRTc*h0(T,u,v)/24.0;\n')
+    f.write('    eqh[1] = rRTc*h1(T,u,v)/12.0;\n')
+    f.write('    eqh[2] = rRTc*h1(T,v,u)/12.0;\n')
+    f.write('    eqh[3] = rRTc*h1(T,-u,v)/12.0;\n')
+    f.write('    eqh[4] = rRTc*h1(T,-v,u)/12.0;\n')
+    f.write('    eqh[5] = rRTc*h5(T,u,v)/24.0;\n')
+    f.write('    eqh[6] = rRTc*h5(T,-u,v)/24.0;\n')
+    f.write('    eqh[7] = rRTc*h5(T,-u,-v)/24.0;\n')
+    f.write('    eqh[8] = rRTc*h5(T,u,-v)/24.0;\n')
+    f.write('    eqh[9] = rRTc*h9(T,u,v)/48.0;\n')
+    f.write('    eqh[10] =rRTc*h9(T,v,u)/48.0;\n')
+    f.write('    eqh[11] =rRTc*h9(T,-u,v)/48.0;\n')
+    f.write('    eqh[12] =rRTc*h9(T,-v,u)/48.0;\n\n')
     if 0:
         f.write('    //check\n')
         f.write('    double sum_f = 0;\n')
@@ -293,7 +317,7 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('                i = Nx - 1; //zeroth order extrapolation\n')
     f.write('        }\n')
     f.write('    }\n')
-
+    
     f.write('    else if (d == 1) {\n')
     f.write('        if (i < 0) {\n')
     if input['periodicY'] > 0:
@@ -511,13 +535,29 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('            Sp[i] = S[i]*posFlow;\n')
         f.write('        }\n\n')
         f.write('        double B0p, B1p, B2p, alpha0p, alpha1p, alpha2p;\n')
-        f.write('        double omega0p, omega1p, omega2p, f0p, f1p, f2p;\n\n')
-        f.write('        B0p = {}*pow(Sp[0] - 2.0*Sp[1] + Sp[2],2) + {}*pow(Sp[0] - 4.0*Sp[1] + 3.0*Sp[2],2);\n'.format(13.0/12.0,1.0/4.0))
-        f.write('        B1p = {}*pow(Sp[1] - 2.0*Sp[2] + Sp[3],2) + {}*pow(Sp[1] - Sp[3],2);\n'.format(13.0/12.0,1.0/4.0))
-        f.write('        B2p = {}*pow(Sp[2] - 2.0*Sp[3] + Sp[3],2) + {}*pow(3.0*Sp[2] - 4.0*Sp[3] + Sp[4],2);\n\n'.format(13.0/12.0,1.0/4.0))
-        f.write('        alpha0p = {}*pow(1.0/(epsilon + B0p),2);\n'.format(1.0/10.0))
-        f.write('        alpha1p = {}*pow(1.0/(epsilon + B1p),2);\n'.format(6.0/10.0))
-        f.write('        alpha2p = {}*pow(1.0/(epsilon + B2p),2);\n\n'.format(3.0/10.0))
+        f.write('        double omega0p, omega1p, omega2p, f0p, f1p, f2p, temp1, temp2;\n\n')
+        
+        f.write('        temp1 = Sp[0] - 2.0*Sp[1] + Sp[2];\n')
+        f.write('        temp2 = Sp[0] - 4.0*Sp[1] + 3.0*Sp[2];\n')
+        f.write('        B0p = {}*temp1*temp1 + {}*temp2*temp2;\n'.format(13.0/12.0,1.0/4.0))
+        
+        f.write('        temp1 = Sp[1] - 2.0*Sp[2] + Sp[3];\n')
+        f.write('        temp2 = Sp[1] - Sp[3];\n')
+        f.write('        B1p = {}*temp1*temp1 + {}*temp2*temp2;\n'.format(13.0/12.0,1.0/4.0))
+        
+        f.write('        temp1 = Sp[2] - 2.0*Sp[3] + Sp[3];\n')
+        f.write('        temp2 = 3.0*Sp[2] - 4.0*Sp[3] + Sp[4];\n')
+        f.write('        B2p = {}*temp1*temp1 + {}*temp2*temp2;\n\n'.format(13.0/12.0,1.0/4.0))
+        
+        f.write('        temp1 = 1.0/(epsilon + B0p);\n')
+        f.write('        alpha0p = {}*temp1*temp1;\n'.format(1.0/10.0))
+        
+        f.write('        temp1 = 1.0/(epsilon + B1p);\n')
+        f.write('        alpha1p = {}*temp1*temp1;\n'.format(6.0/10.0))
+        
+        f.write('        temp1 = 1.0/(epsilon + B2p);\n')
+        f.write('        alpha2p = {}*temp1*temp1;\n\n'.format(3.0/10.0))
+        
         f.write('        omega0p = alpha0p/(alpha0p + alpha1p + alpha2p);\n')
         f.write('        omega1p = alpha1p/(alpha0p + alpha1p + alpha2p);\n')
         f.write('        omega2p = alpha2p/(alpha0p + alpha1p + alpha2p);\n\n')
@@ -1302,10 +1342,10 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('        else {\n')
         f.write('            f2_ = FR2(ix,iy,i);\n')
         f.write('            f3_ = FR3(ix,iy,i);\n\n')
-
+    
         f.write('            flux_f2 = clCombineFLUX(fr2_flux_x, fr2_flux_y, i);\n')
         f.write('            flux_f3 = clCombineFLUX(fr3_flux_x, fr3_flux_y, i);\n\n')
-
+    
         f.write('            F_G(ix,iy,i) = F_G(ix,iy,i) - (1.0/2.0)*(flux_f2 + flux_f3) + (dt/2.0)*((feq2[i] - f2_)/tauf2 + (feq3[i] - f3_)/tauf3);\n\n')
         
         f.write('            h2_ = HR2(ix,iy,i);\n')

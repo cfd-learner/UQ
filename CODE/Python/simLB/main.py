@@ -17,6 +17,8 @@ from LBM import ClassLBM
 
 import time
 
+import pyopencl as cl
+
 #########################
 ## MAIN FUNCTIONALITY
 #########################
@@ -35,10 +37,13 @@ mlab.pipeline.surface(mlab.pipeline.extract_edges(data),
 
 t0 = time.clock()
 
-for i in range(1000):
+for i in range(10000):
+    print('step {}'.format(i))
     lbm.runSimStep()
     
-    s.mlab_source.scalars = lbm.rho_H
+    if i%50 == 0:
+        cl.enqueue_read_buffer(lbm.queue, lbm.rho_D, lbm.rho_H).wait()
+        s.mlab_source.scalars = lbm.rho_H
 
 t = time.clock() - t0
 
