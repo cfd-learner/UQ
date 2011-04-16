@@ -57,8 +57,8 @@ class Setup:
         
         multi = 1.0
         
-        self.Nx = 100     #number of elements in X
-        self.Ny = 100     #number of elements in Y
+        self.Nx = 500     #number of elements in X
+        self.Ny = 500     #number of elements in Y
         
         self.Lx = 0.5    #length of domain in X
         self.Ly = self.Lx*multi #length of domain in y
@@ -121,7 +121,7 @@ class Setup:
         
         ##########################
         ## SIMULATION LISTS
-        self.numProps = 2
+        self.numProps = 3
         self.density =   array([rhoL,rhoR, rhoR],dtype=float64)
         self.pressure =  array([pL,pR, pR],dtype=float64)
         self.therm =      array([TL, TR, TR],dtype=float64)
