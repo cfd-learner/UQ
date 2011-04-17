@@ -59,13 +59,14 @@ class ClassLBM:
         
         # select device
         for found_platform in cl.get_platforms():
-            if found_platform.name == 'ATI Stream':
+            if found_platform.name == 'NVIDIA CUDA':
                 my_platform = found_platform;
         
         for found_device in my_platform.get_devices():
-            if found_device.name[0:5] == 'Intel':
+            if found_device.name == 'GeForce GTX 480':
                 device = found_device
         
+
         self.ctx = cl.Context([device])
         #self.ctx = cl.create_some_context();
         self.queue = cl.CommandQueue(self.ctx)
@@ -146,12 +147,9 @@ class ClassLBM:
         ##########################
         ## PLOTTING
         
-        cl.enqueue_read_buffer(self.queue, self.uy_D, self.uy_H).wait()
-
-        #plt.contour(self.bnd)
-        #plt.show()
+        #cl.enqueue_read_buffer(self.queue, self.rho_D, self.rho_H).wait()
         #
-        #mlab.surf(self.uy_H)
+        #mlab.surf(self.rho_H)
         #mlab.view(0,180)
         #mlab.show()
         
@@ -283,56 +281,56 @@ class ClassLBM:
         ## OpenCL buffers
         
         # global
-        self.f_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.f_H)
-        self.h_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.h_H)
+        self.f_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.f_H)
+        self.h_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.h_H)
         
-        self.dx_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.dx)
-        self.dy_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.dy)
+        self.dx_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.dx)
+        self.dy_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.dy)
         
-        self.rho_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.rho_H)
-        self.ux_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.ux_H)
-        self.uy_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.uy_H)
-        self.T_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.T_H)
+        self.rho_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.rho_H)
+        self.ux_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.ux_H)
+        self.uy_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.uy_H)
+        self.T_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.T_H)
         
-        self.bnd_D = cl.Buffer(self.ctx, mf.READ_ONLY | mf.USE_HOST_PTR,hostbuf = self.bnd)
-        self.cell_D = cl.Buffer(self.ctx, mf.READ_ONLY | mf.USE_HOST_PTR,hostbuf = self.cell)
+        self.bnd_D = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR,hostbuf = self.bnd)
+        self.cell_D = cl.Buffer(self.ctx, mf.READ_ONLY | mf.COPY_HOST_PTR,hostbuf = self.cell)
         
-        self.density_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.density)
-        self.velX_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.velX)
-        self.velY_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.velY)
-        self.therm_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.therm)
+        self.density_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.density)
+        self.velX_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.velX)
+        self.velY_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.velY)
+        self.therm_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.therm)
         
         # local
-        self.fr1_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr1_H)
-        self.hr1_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr1_H)
+        self.fr1_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr1_H)
+        self.hr1_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr1_H)
         
         if self.RKMETHOD == 0:
-            self.fr1_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr1_flux_x_H)
-            self.fr1_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr1_flux_y_H)
-            self.hr1_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr1_flux_x_H)
-            self.hr1_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr1_flux_y_H)
+            self.fr1_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr1_flux_x_H)
+            self.fr1_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr1_flux_y_H)
+            self.hr1_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr1_flux_x_H)
+            self.hr1_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr1_flux_y_H)
         
         elif self.RKMETHOD == 1:
-            self.fr2_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr2_H)
-            self.hr2_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr2_H)
+            self.fr2_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr2_H)
+            self.hr2_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr2_H)
             
-            self.fr3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr3_H)
-            self.hr3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr3_H)
+            self.fr3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr3_H)
+            self.hr3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr3_H)
         
-            self.rho3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.rho3_H)
-            self.ux3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.ux3_H)
-            self.uy3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.uy3_H)
-            self.T3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.T3_H)
+            self.rho3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.rho3_H)
+            self.ux3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.ux3_H)
+            self.uy3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.uy3_H)
+            self.T3_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.T3_H)
             
-            self.fr2_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr2_flux_x_H)
-            self.fr2_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr2_flux_y_H)
-            self.hr2_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr2_flux_x_H)
-            self.hr2_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr2_flux_y_H)
+            self.fr2_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr2_flux_x_H)
+            self.fr2_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr2_flux_y_H)
+            self.hr2_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr2_flux_x_H)
+            self.hr2_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr2_flux_y_H)
             
-            self.fr3_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr3_flux_x_H)
-            self.fr3_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.fr3_flux_y_H)
-            self.hr3_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr3_flux_x_H)
-            self.hr3_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.USE_HOST_PTR,hostbuf = self.hr3_flux_y_H)
+            self.fr3_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr3_flux_x_H)
+            self.fr3_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.fr3_flux_y_H)
+            self.hr3_flux_x_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr3_flux_x_H)
+            self.hr3_flux_y_D = cl.Buffer(self.ctx, mf.READ_WRITE | mf.COPY_HOST_PTR,hostbuf = self.hr3_flux_y_H)
             
         ##########################
         ## PACK DICTIONARY
@@ -353,7 +351,7 @@ class ClassLBM:
         f = open(name,'r')
         fstr = "".join(f.readlines())
         f.close()
-        print fstr
+        #print fstr
         
         t0 = time.clock()
         self.prg = cl.Program(self.ctx, fstr).build()
@@ -388,6 +386,10 @@ class ClassLBM:
                            self.velX_D, self.velY_D, self.rho_D, self.ux_D,
                            self.uy_D, self.T_D).wait()
         
+        #print 'fr1'
+        #cl.enqueue_read_buffer(self.queue, self.fr1_D, self.fr1_H).wait()
+        #print self.fr1_H
+        
         # perform flux routine
         self.prg.GLOBAL_FLUXES(self.queue, self.global_size, self.local_size,
                                self.fr1_D, self.hr1_D, self.cell_D, self.bnd_D,
@@ -400,6 +402,18 @@ class ClassLBM:
                                  self.hr1_flux_x_D, self.hr1_flux_y_D,
                                  self.cell_D, self.bnd_D, self.therm_D,
                                  self.velX_D, self.velY_D).wait()
+            
+        #print 'flux x'
+        #cl.enqueue_read_buffer(self.queue, self.fr1_flux_x_D, self.fr1_flux_x_H).wait()
+        #print self.fr1_flux_x_H
+        #
+        #print 'flux y'
+        #cl.enqueue_read_buffer(self.queue, self.fr1_flux_y_D, self.fr1_flux_y_H).wait()
+        #print self.fr1_flux_y_H
+        #    
+        #print 'f before update'
+        #cl.enqueue_read_buffer(self.queue, self.f_D, self.f_H).wait()
+        #print self.f_H
         
         # perform combination step
         self.prg.RK1_COMBINE(self.queue, self.global_size, self.local_size,
@@ -409,6 +423,10 @@ class ClassLBM:
                              self.uy_D, self.T_D, self.fr1_flux_x_D,
                              self.fr1_flux_y_D, self.hr1_flux_x_D,
                              self.hr1_flux_y_D).wait()
+        
+        #print 'f after update'
+        #cl.enqueue_read_buffer(self.queue, self.f_D, self.f_H).wait()
+        #print self.f_H
         
     def RK3(self):
         """

@@ -33,21 +33,31 @@ lbm = ClassLBM("makeBoundaryLayer")
 #plotting
 fig = mlab.figure(size = (1000,1000))
 mlab.view(0,180)
-data = mlab.pipeline.array2d_source(lbm.X,lbm.Y,lbm.rho_H)
+
+#cl.enqueue_read_buffer(lbm.queue, lbm.rho_D, lbm.rho_H).wait()
+#cl.enqueue_read_buffer(lbm.queue, lbm.uy_D, lbm.uy_H).wait()
+cl.enqueue_read_buffer(lbm.queue, lbm.ux_D, lbm.ux_H).wait()
+
+data = mlab.pipeline.array2d_source(lbm.X,lbm.Y,lbm.uy_H)
 s = mlab.pipeline.surface(data)
-#mlab.pipeline.surface(mlab.pipeline.extract_edges(data),
-#                            color=(0, 0, 0),line_width = 0.1)
+mlab.pipeline.surface(mlab.pipeline.extract_edges(data),
+                            color=(0, 0, 0),line_width = 0.1)
 
 t0 = time.clock()
 
-for i in range(1000):
+for i in range(lbm.steps):
     
     lbm.runSimStep()
     
-    #if i%10 == 0:
-    #cl.enqueue_read_buffer(lbm.queue, lbm.rho_D, lbm.rho_H).wait()
-    #cl.enqueue_read_buffer(lbm.queue, lbm.uy_D, lbm.uy_H).wait()
-    s.mlab_source.scalars = lbm.rho_H
+    if i%lbm.nPrintOut == 0:
+        #cl.enqueue_read_buffer(lbm.queue, lbm.rho_D, lbm.rho_H).wait()
+        #cl.enqueue_read_buffer(lbm.queue, lbm.uy_D, lbm.uy_H).wait()
+        cl.enqueue_read_buffer(lbm.queue, lbm.ux_D, lbm.ux_H).wait()
+        
+        s.mlab_source.scalars = lbm.ux_H
+        
+    if i == lbm.steps - 1:
+        mlab.show()
     
 
     print('step {}'.format(i))

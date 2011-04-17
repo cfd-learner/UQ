@@ -18,13 +18,13 @@ class Setup:
     mu = 1.86e-5    #dynamic viscosity
     Pr = 0.71       #Prandtl number
     
-    RKMETHOD = 1
-    FMETHOD = 1
-    CFL = 0.5
+    RKMETHOD = 0
+    FMETHOD = 0
+    CFL = 0.1
     dtau = 0.0
     tt_tref = 0.0
     tt_time = 0.0
-    steps = 1000
+    steps = 10000
     tol = 0.0
     periodicX = 0
     periodicY = 0
@@ -35,20 +35,18 @@ class Setup:
     rho_ref = 0.0
     p_ref = 0.0
     T_ref = 0.0
-    Tc_Tref = 2.0
+    Tc_Tref = 3.0
     nPrintOut = 100
     
     def initialise(self):
         ##########################
         ## domain definition
         
-        multi = 1.0
-        
-        self.Nx = 100     #number of elements in X
-        self.Ny = 50     #number of elements in Y
+        self.Nx = 50     #number of elements in X
+        self.Ny = 100    #number of elements in Y
         
         self.Lx = 1.0    #length of domain in X
-        self.Ly = 0.5 #length of domain in y
+        self.Ly = 0.6 #length of domain in y
         
         #uniform spacing
         dx_ = self.Lx/self.Nx

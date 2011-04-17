@@ -1,6 +1,6 @@
 // kernel.cl
 
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable 
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable 
 
 /////////////////////////////////////////
 //MACROS 
@@ -31,8 +31,8 @@
 //CONSTANTS 
 /////////////////////////////////////////
 
-#define Nx 100
-#define Ny 50
+#define Nx 50
+#define Ny 100
 #define Ni 13 
 
 __constant double mu = 1.86e-05;
@@ -40,9 +40,9 @@ __constant double Pr = 0.71;
 __constant double R = 287.0;
 __constant double K = 3.0;
 __constant double b = 5.0;
-__constant double Tc = 606.002602025;
+__constant double Tc = 909.003903037;
 
-__constant double dt = 5.99462217452e-06;
+__constant double dt = 5.87350621134e-07;
 
 __constant int periodicX = 0;
 __constant int periodicY = 0;
@@ -51,11 +51,11 @@ __constant int mirrorS = 0;
 __constant int mirrorE = 0;
 __constant int mirrorW = 0;
 
-__constant double ex[13] = {0.0, 417.040461803, 0.0, -417.040461803, 0.0, 417.040461803, -417.040461803, -417.040461803, 417.040461803, 834.080923607, 0.0, -834.080923607, 0.0};
-__constant double ey[13] = {0.0, 0.0, 417.040461803, 0.0, -417.040461803, 417.040461803, 417.040461803, -417.040461803, -417.040461803, 0.0, 834.080923607, 0.0, -834.080923607};
+__constant double ex[13] = {0.0, 510.768166756, 0.0, -510.768166756, 0.0, 510.768166756, -510.768166756, -510.768166756, 510.768166756, 1021.53633351, 0.0, -1021.53633351, 0.0};
+__constant double ey[13] = {0.0, 0.0, 510.768166756, 0.0, -510.768166756, 510.768166756, 510.768166756, -510.768166756, -510.768166756, 0.0, 1021.53633351, 0.0, -1021.53633351};
 
-__constant double dx[100] = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
-__constant double dy[50] = {0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
+__constant double dx[50] = {0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02};
+__constant double dy[100] = {0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006, 0.006};
 
 __constant unsigned int mirrorNS[13] = {0,1,4,3,2,8,7,6,5,9,12,11,10};
 __constant unsigned int mirrorEW[13] = {0,3,2,1,4,6,5,8,7,11,10,9,12};
@@ -150,8 +150,8 @@ int clEq2D(double rho, double u_, double v_, double T_, double* eqf, double* eqh
     //returns the equilibrium values for each velocity vector given the current
     // macroscopic values and the corresponding reference quantities
 
-    double u = u_/417.040461803;
-    double v = v_/417.040461803;
+    double u = u_/510.768166756;
+    double v = v_/510.768166756;
     double T = T_/Tc;
 
     eqf[0] = f0(rho,u,v,T);
@@ -168,7 +168,7 @@ int clEq2D(double rho, double u_, double v_, double T_, double* eqf, double* eqh
     eqf[11] = f9(rho,-u,v,T);
     eqf[12] = f9(rho,-v,u,T);
 
-    double rRTc = rho*173922.746781;
+    double rRTc = rho*260884.120172;
 
     eqh[0] = rRTc*h0(T,u,v)/24.0;
     eqh[1] = rRTc*h1(T,u,v)/12.0;
@@ -287,7 +287,7 @@ clStencil(__global double* f,
     int exi = clSign(ex[i]);
     int eyi = clSign(ey[i]);
 
-    int low = 2;    // max/min num of stencil from centre
+    int low = 1;    // max/min num of stencil from centre
 
     // calculate stencil along x and y
     int jx1 = ix - exi*low;        //start of stencil index
@@ -297,12 +297,12 @@ clStencil(__global double* f,
 
     int sld_x = 0;
     int sld_y = 0;
-    int sldx[5];
-    int sldy[5];
+    int sldx[3];
+    int sldy[3];
 
     int id, type;
 
-    for (int j = 0; j < 5; j++) {
+    for (int j = 0; j < 3; j++) {
         // put together stencil along axis lines, start on low side, go to hi side: [j-low <-> j+low]
         jx = clIndex(jx1,exi*j,0,&mir_y);
         jy = clIndex(jy1,eyi*j,1,&mir_x);
@@ -341,7 +341,7 @@ clStencil(__global double* f,
 
     if (sld_x == 1) {
         // find where edge solid node is
-        for (int j = 0; j < 4; j++) {
+        for (int j = 0; j < 2; j++) {
             diff = sldx[j] - sldx[j+1];
             if (diff > 0) {
                 j_ = j;
@@ -364,7 +364,7 @@ clStencil(__global double* f,
 
         int j__ = j_ - diff;
 
-        if (j__ >= 0 && j__ < 5) { // update next one along if stencil is long enough
+        if (j__ >= 0 && j__ < 3) { // update next one along if stencil is long enough
             Sx[j__] = Sx[j_];
         }
     }
@@ -372,7 +372,7 @@ clStencil(__global double* f,
     if (sld_y == 1) {
 
         // find where edge solid node is
-        for (int j = 0; j < 4; j++) {
+        for (int j = 0; j < 2; j++) {
             diff = sldy[j] - sldy[j+1];
             if (diff > 0) {
                 j_ = j;
@@ -395,65 +395,63 @@ clStencil(__global double* f,
 
         int j__ = j_ - diff;
 
-        if (j__ >= 0 && j__ < 5) {    // update next one along if stencil is long enough
+        if (j__ >= 0 && j__ < 3) {    // update next one along if stencil is long enough
             Sy[j__] = Sy[j_];
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// clWENO5
+// clMinMod
 ////////////////////////////////////////////////////////////////////////////////
 
 double
-clWENO5(double* S, double e)
+clMinmod(double a, double b)
 {
-    // calculate the flux term of the WENO5 scheme for one flow direction
+    // calculate minmod function
 
-    double epsilon = (double) 1e-6;
-    double posFlow = fabs(e);
-    double F_Ip12;
+   double out;
 
-    if (posFlow == 0) {
+   if ((fabs(a) < fabs(b)) && (a*b > 0))
+       out = a;
+    else if ((fabs(b) < fabs(a)) && (a*b > 0))
+       out = b;
+    else if (a == b)
+       out = a;
+    else if (a*b <= 0)
+       out = 0;
+    return out;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// clNND
+////////////////////////////////////////////////////////////////////////////////
+
+double
+clNND(double* S, double e)
+{
+   // calculate the flux by the NND method (2nd order accurate, CFL_max = 2/3)
+
+    double Fp_I, Fp_Ip1, Fp_Im1;
+
+    double vP = fabs(e);
+
+    if (vP == 0) {
         return 0;
     }
-    else {
-        double Sp[5];
-        for (int i = 0; i < 5; i++) {
-            Sp[i] = S[i]*posFlow;
-        }
 
-        double B0p, B1p, B2p, alpha0p, alpha1p, alpha2p;
-        double omega0p, omega1p, omega2p, f0p, f1p, f2p, temp1, temp2;
+    Fp_I   = vP*S[1];
+    Fp_Ip1 = vP*S[2];
+    Fp_Im1 = vP*S[0];
 
-        temp1 = Sp[0] - 2.0*Sp[1] + Sp[2];
-        temp2 = Sp[0] - 4.0*Sp[1] + 3.0*Sp[2];
-        B0p = 1.08333333333*temp1*temp1 + 0.25*temp2*temp2;
-        temp1 = Sp[1] - 2.0*Sp[2] + Sp[3];
-        temp2 = Sp[1] - Sp[3];
-        B1p = 1.08333333333*temp1*temp1 + 0.25*temp2*temp2;
-        temp1 = Sp[2] - 2.0*Sp[3] + Sp[3];
-        temp2 = 3.0*Sp[2] - 4.0*Sp[3] + Sp[4];
-        B2p = 1.08333333333*temp1*temp1 + 0.25*temp2*temp2;
+    double dFp_Ip12, dFp_Im12;
 
-        temp1 = 1.0/(epsilon + B0p);
-        alpha0p = 0.1*temp1*temp1;
-        temp1 = 1.0/(epsilon + B1p);
-        alpha1p = 0.6*temp1*temp1;
-        temp1 = 1.0/(epsilon + B2p);
-        alpha2p = 0.3*temp1*temp1;
+    dFp_Ip12 = Fp_Ip1 - Fp_I;
+    dFp_Im12 = Fp_I - Fp_Im1;
 
-        omega0p = alpha0p/(alpha0p + alpha1p + alpha2p);
-        omega1p = alpha1p/(alpha0p + alpha1p + alpha2p);
-        omega2p = alpha2p/(alpha0p + alpha1p + alpha2p);
+    double F_Ip12;
 
-        f0p = 0.333333333333*Sp[0] - 1.16666666667*Sp[1] + 1.83333333333*Sp[2];
-        f1p = -0.166666666667*Sp[1] + 0.833333333333*Sp[2] + 0.333333333333*Sp[3];
-        f2p = 0.333333333333*Sp[2] + 0.833333333333*Sp[3] - 0.166666666667*Sp[4];
-
-        F_Ip12 = omega0p*f0p + omega1p*f1p + omega2p*f2p;
-
-    }
+    F_Ip12 = Fp_I + 0.5*clMinmod(dFp_Ip12,dFp_Im12);
 
     return F_Ip12;
 }
@@ -472,14 +470,14 @@ clFLUX(__global double* f, int i, __global int* cell, __global int* bnd, double*
     exi = ex[i];
     eyi = ey[i];
 
-    // WENO5
-    double Sx[5];
-    double Sy[5];
+    //NND
+    double Sx[3];
+    double Sy[3];
 
     clStencil(f, Sx, Sy, i, cell, bnd);
 
-    (*flux_x) = clWENO5(Sx, exi);
-    (*flux_y) = clWENO5(Sy, eyi);
+    (*flux_x) = clNND(Sx,exi);
+    (*flux_y) = clNND(Sy,eyi);
 
 }
 
@@ -571,7 +569,7 @@ clPosFlux(__global double* f,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// KERNEL: clMacroProp
+// clMacroProp
 ////////////////////////////////////////////////////////////////////////////////
 
 #define RHO(x,y) rho[x*Ny + y] 
@@ -619,65 +617,6 @@ clMacroProp(__global double* f,
     UX(ix,iy) = ux_;
     UY(ix,iy) = uy_;
     T(ix,iy) = T_;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// clMacroProp3
-////////////////////////////////////////////////////////////////////////////////
-
-#define RHO_3(x,y) rho_3[x*Ny + y] 
-#define UX_3(x,y) ux_3[x*Ny + y] 
-#define UY_3(x,y) uy_3[x*Ny + y] 
-#define T_3(x,y)  T_3[x*Ny + y] 
-
-__kernel void
-clMacroProp3(__global double* f,
-    __global double* h,
-    __global double* rho_3,
-    __global double* ux_3,
-    __global double* uy_3,
-    __global double* T_3,    __global double* f_flux_x2,
-    __global double* f_flux_y2,
-    __global double* h_flux_x2,
-    __global double* h_flux_y2)
-{
-    //perform RK3 step 3 macroscopic properties calculation
-
-    // global index
-    size_t ix = get_global_id(0);
-    size_t iy = get_global_id(1);
-
-    double rho_ = 0.0;
-    double rho_ux = 0.0;
-    double rho_uy = 0.0;
-    double sum_h = 0.0;
-    double ux_, uy_, T_, flux_f, flux_h;
-
-    for (int i = 0; i < Ni; i++) {
-        //calculate fluxes
-        flux_f = clCombineFLUX(f_flux_x2, f_flux_y2, i);
-        flux_h = clCombineFLUX(h_flux_x2, h_flux_y2, i);
-
-        rho_    += F(ix,iy,i) - flux_f;
-        rho_ux  += (F(ix,iy,i) - flux_f)*ex[i];
-        rho_uy  += (F(ix,iy,i) - flux_f)*ey[i];
-        sum_h   += H(ix,iy,i) - flux_h;
-    }
-    ux_ = rho_ux/rho_;
-    uy_ = rho_uy/rho_;
-
-    double ux_abs, uy_abs, usq;
-
-    ux_abs = fabs(ux_);
-    uy_abs = fabs(uy_);
-    usq = ux_abs*ux_abs + uy_abs*uy_abs;
-    T_ = 2.0*(sum_h/rho_ - usq/2.0)/(b*R);
-
-    // assign variables to arrays
-    RHO_3(ix,iy) = rho_;
-    UX_3(ix,iy) = ux_;
-    UY_3(ix,iy) = uy_;
-    T_3(ix,iy) = T_;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -782,7 +721,7 @@ WALL_FLUXES(__global double* f_flux_x,
         flux_in = 0;
         flux_out = 0;
 
-        double vol = dx[ix]*dy[iy];
+        double volWall = dx[ix]*dy[iy];
 
         clEq2D(1.0, VELX(id), VELY(id), THERM(id), feqW, heqW);
 
@@ -810,7 +749,7 @@ WALL_FLUXES(__global double* f_flux_x,
                     ux = fabs(ex[inv_i]);    
                     uy = fabs(ey[inv_i]);
 
-                    flux_out += inx*feqW[inv_i]*ux*vol/dx[ix] + iny*feqW[inv_i]*uy*vol/dy[iy];                // flux out of solid, back along inverse velocity
+                    flux_out += inx*feqW[inv_i]*ux/dx[ix] + iny*feqW[inv_i]*uy/dy[iy];                // flux out of solid, back along inverse velocity
                 }
             }
         }
@@ -822,23 +761,23 @@ WALL_FLUXES(__global double* f_flux_x,
             ux = fabs(ex[i]);    
             uy = fabs(ey[i]);
 
-             F_FLUX_X(ix,iy,i) = alpha*ux*vol*feqW[i];
-             F_FLUX_Y(ix,iy,i) = alpha*uy*vol*feqW[i];
+             F_FLUX_X(ix,iy,i) = alpha*ux*feqW[i];
+             F_FLUX_Y(ix,iy,i) = alpha*uy*feqW[i];
 
-             H_FLUX_X(ix,iy,i) = alpha*ux*vol*heqW[i];
-             H_FLUX_Y(ix,iy,i) = alpha*uy*vol*heqW[i];
+             H_FLUX_X(ix,iy,i) = alpha*ux*heqW[i];
+             H_FLUX_Y(ix,iy,i) = alpha*uy*heqW[i];
         }
     }
 }
 ////////////////////////////////////////////////////////////////////////////////
-//KERNEL: RK3_STEP1
+//KERNEL: RK1_STEP1
 ////////////////////////////////////////////////////////////////////////////////
 
-// macros for RK3
+// macros for RK1
 #define FR1(x,y,i) fr1[x*Ny*Ni + y*Ni + i]
 #define HR1(x,y,i) hr1[x*Ny*Ni + y*Ni + i]
 __kernel void
-RK3_STEP1(__global double* f_G,
+RK1_STEP1(__global double* f_G,
     __global double* fr1,
     __global double* h_G,
     __global double* hr1,
@@ -852,66 +791,64 @@ RK3_STEP1(__global double* f_G,
     __global double* uy_G,
     __global double* T_G)
 {
-    //perform RK3 stepping
+    //perform RK1 stepping
 
     // global index
     size_t ix = get_global_id(0);
     size_t iy = get_global_id(1);
 
-    // macroscopic properties
     double rho = RHO_G(ix,iy);
     double ux = UX_G(ix,iy);
     double uy = UY_G(ix,iy);
     double T = T_G(ix,iy);
 
-    // calculate relaxation times from macroscopic properties
-    double tauf = mu/(rho*R*T);
-    double tauh = tauf/Pr;
-    double tauhf = (tauh*tauf)/(tauf - tauh);
-
     double feq[Ni];
     double heq[Ni];
-
-    clEq2D(rho, ux, uy, T, feq, heq);
 
     int id = BND(ix,iy);
     int type = CELL(id);
 
     // --- RK STEP ONE----
     // calculate the first stage updated distribution functions 
-    for (int i = 0; i < Ni; i++) {
-        if (type > 0) {
+
+    if (type > 0) {   // check if node is solid or permanent, if it is, just propogate values
+        for (int i = 0; i < Ni; i++) {
             FR1(ix,iy,i) = F_G(ix,iy,i);
             HR1(ix,iy,i) = H_G(ix,iy,i);
         }
-        else {
-            double f1_, edotu;
+    }
+    else {
+        // calculate relaxation times from macroscopic properties
+        double tauf = mu/(rho*R*T);
+        double tauh = tauf/Pr;
+        double tauhf = (tauh*tauf)/(tauf - tauh);
+
+        clEq2D(rho, ux, uy, T, feq, heq);
+
+        double f1_, edotu;
+        for (int i = 0; i < Ni; i++) {
             // temp variables
-            f1_ = (F_G(ix,iy,i) + (dt/(2*tauf))*feq[i])/(1.0 + dt/(2*tauf));    //calc to temp variable first, for use later
+            f1_ = (F_G(ix,iy,i) + (dt/tauf)*feq[i])/(1.0 + dt/tauf);    //calc to temp variable first, for use later
 
             FR1(ix,iy,i) = f1_;        // save to global
 
             // temp variables
             edotu = ex[i]*ux + ey[i]*uy;
 
-            HR1(ix,iy,i) = (H_G(ix,iy,i) - (dt/2.0)*edotu*((feq[i] - f1_)/tauhf) + (dt/(2.0*tauh))*heq[i])/(1.0 + dt/(2.0*tauh));
+            HR1(ix,iy,i) = (H_G(ix,iy,i) - dt*edotu*((feq[i] - f1_)/tauhf) + (dt/tauh)*heq[i])/(1.0 + dt/tauh);
         }
     }
 }
+
 ////////////////////////////////////////////////////////////////////////////////
-//KERNEL: RK3_STEP2
+//KERNEL: RK1_COMBINE
 ////////////////////////////////////////////////////////////////////////////////
 
-// macros for RK3
-#define FR2(x,y,i) fr2[x*Ny*Ni + y*Ni + i]
-#define HR2(x,y,i) hr2[x*Ny*Ni + y*Ni + i]
 __kernel void
-RK3_STEP2(__global double* f_G,
+RK1_COMBINE(__global double* f_G,
     __global double* fr1,
-    __global double* fr2,
     __global double* h_G,
     __global double* hr1,
-    __global double* hr2,
     __global int* cell,
     __global int* bnd,
     __global double* therm,
@@ -920,11 +857,13 @@ RK3_STEP2(__global double* f_G,
     __global double* rho_G,
     __global double* ux_G,
     __global double* uy_G,
-    __global double* T_G)
+    __global double* T_G,
+    __global double* fr1_flux_x,
+    __global double* fr1_flux_y,
+    __global double* hr1_flux_x,
+    __global double* hr1_flux_y)
 {
-    //perform RK3 stepping
-
-    // NOTE: as all equilibrium df are calulated from the same data, feq1 = feq2 etc, this allows for simplification of equations
+    //combine step of RK1
 
     // global index
     size_t ix = get_global_id(0);
@@ -946,234 +885,27 @@ RK3_STEP2(__global double* f_G,
 
     clEq2D(rho, ux, uy, T, feq, heq);
 
-    int id = BND(ix,iy);
-    int type = CELL(id);
-
-    // --- RK STEP TWO----
-    // calculate the first stage updated distribution functions 
-
-    if (type > 0) {
-        for (int i = 0; i < Ni; i++) {
-            FR2(ix,iy,i) = F_G(ix,iy,i);
-            HR2(ix,iy,i) = H_G(ix,iy,i);
-        }
-    }
-    else {
-
-        double f1_, f2_, edotu;
-
-        for (int i = 0; i < Ni; i++) {
-            // temp variables
-            f1_ = FR1(ix,iy,i);
-            f2_ = (F_G(ix,iy,i) + (dt/(2*tauf))*f1_)/(1.0 + dt/(2*tauf));    //calc to temp variable first, for use later
-
-            FR2(ix,iy,i) = f2_;        // save to global
-
-            // temp variables
-            edotu = ex[i]*ux + ey[i]*uy;
-
-            HR2(ix,iy,i) = (H_G(ix,iy,i) - (dt/2.0)*(edotu/tauhf)*(f1_ - f2_) + (dt/2.0)*(HR1(ix,iy,i)/tauh))/(1.0 + dt/(2.0*tauh));
-        }
-    }
-}
-////////////////////////////////////////////////////////////////////////////////
-//KERNEL: RK3_STEP3
-////////////////////////////////////////////////////////////////////////////////
-
-// macros for RK3
-#define FR3(x,y,i) fr3[x*Ny*Ni + y*Ni + i]
-#define HR3(x,y,i) hr3[x*Ny*Ni + y*Ni + i]
-__kernel void
-RK3_STEP3(__global double* f_G,
-    __global double* fr2,
-    __global double* fr3,
-    __global double* h_G,
-    __global double* hr2,
-    __global double* hr3,
-    __global int* cell,
-    __global int* bnd,
-    __global double* therm,
-    __global double* velX,
-    __global double* velY,
-    __global double* rho_G,
-    __global double* rho_3,
-    __global double* ux_G,
-    __global double* ux_3,
-    __global double* uy_G,
-    __global double* uy_3,
-    __global double* T_G,
-    __global double* T_3,
-    __global double* fr2_flux_x,
-    __global double* fr2_flux_y,
-    __global double* hr2_flux_x,
-    __global double* hr2_flux_y)
-{
-    //perform RK3 stepping
-
-    size_t ix = get_global_id(0);
-    size_t iy = get_global_id(1);
-
-    // macroscopic properties
-    double rho2 = RHO_G(ix,iy);
-    double ux2 = UX_G(ix,iy);
-    double uy2 = UY_G(ix,iy);
-    double T2 = T_G(ix,iy);
-
-    clMacroProp3(f_G, h_G, rho_3, ux_3, uy_3, T_3, fr2_flux_x, fr2_flux_y, hr2_flux_x, hr2_flux_y);
-
-    double rho3 = RHO_3(ix,iy);
-    double ux3 =  UX_3(ix,iy);
-    double uy3 =  UY_3(ix,iy);
-    double T3 =   T_3(ix,iy);
-
-    // calculate relaxation times from macroscopic properties
-    double tauf2 = mu/(rho2*R*T2);
-    double tauh2 = tauf2/Pr;
-    double tauhf2 = (tauh2*tauf2)/(tauf2 - tauh2);
-
-    double tauf3 = mu/(rho3*R*T3);
-    double tauh3 = tauf3/Pr;
-    double tauhf3 = (tauh3*tauf3)/(tauf3 - tauh3);
-    double feq2[Ni];
-    double heq2[Ni];
-
-    double feq3[13];
-    double heq3[13];
-
-    clEq2D(rho2, ux2, uy2, T2, feq2, heq2);
-    clEq2D(rho3, ux3, uy3, T3, feq3, heq3);
+    double flux_f, flux_h, edotu;
 
     int id = BND(ix,iy);
     int type = CELL(id);
 
-    double flux_f2, flux_h2, edotu2, edotu3, f2_, f3_;
-
-    for (int i = 0; i < Ni; i++) {
-        // calculate the updated distribution functions
-        if (type > 0) {
-            FR3(ix,iy,i) = F_G(ix,iy,i);
-            HR3(ix,iy,i) = H_G(ix,iy,i);
-        }
-        else {
-            flux_f2 = clCombineFLUX(fr2_flux_x, fr2_flux_y, i);
-
-            f2_ = FR2(ix,iy,i);
-
-            f3_ = (F_G(ix,iy,i) - flux_f2 + (dt/(2*tauf2))*(feq2[i] - f2_) + (dt/(2.0*tauf3))*feq3[i])/(1 + dt/(2*tauf3));
-
-            FR3(ix,iy,i) = f3_;
-
-            flux_h2 = clCombineFLUX(hr2_flux_x, hr2_flux_y, i);
-
-            edotu2 = ex[i]*ux2 + ey[i]*uy2;
-            edotu3 = ex[i]*ux3 + ey[i]*uy3;
-
-            HR3(ix,iy,i) = (H_G(ix,iy,i) - flux_h2 - (dt/2.0)*(edotu2*((feq2[i] - f2_)/tauhf2) + edotu3*((feq3[i] - f3_)/tauhf3)) + 
-                (dt/2.0)*((heq2[i] - HR2(ix,iy,i))/tauh2) + (dt/2.0)*(heq3[i]/tauh3))/(1.0 + dt/(2.0*tauh3));
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//KERNEL: RK3_COMBINE
-////////////////////////////////////////////////////////////////////////////////
-
-__kernel void
-RK3_COMBINE(__global double* f_G,
-    __global double* fr2,
-    __global double* fr3,
-    __global double* h_G,
-    __global double* hr2,
-    __global double* hr3,
-    __global int* cell,
-    __global int* bnd,
-    __global double* therm,
-    __global double* velX,
-    __global double* velY,
-    __global double* rho_G,
-    __global double* rho_3,
-    __global double* ux_G,
-    __global double* ux_3,
-    __global double* uy_G,
-    __global double* uy_3,
-    __global double* T_G,
-    __global double* T_3,
-    __global double* fr2_flux_x,
-    __global double* fr3_flux_x,
-    __global double* fr2_flux_y,
-    __global double* fr3_flux_y,
-    __global double* hr2_flux_x,
-    __global double* hr3_flux_x,
-    __global double* hr2_flux_y,
-    __global double* hr3_flux_y)
-{
-    //perform RK3 combination step
-
-    size_t ix = get_global_id(0);
-    size_t iy = get_global_id(1);
-
-    // macroscopic properties
-    double rho2 = RHO_G(ix,iy);
-    double ux2 = UX_G(ix,iy);
-    double uy2 = UY_G(ix,iy);
-    double T2 = T_G(ix,iy);
-
-    double rho3 = RHO_3(ix,iy);
-    double ux3 =  UX_3(ix,iy);
-    double uy3 =  UY_3(ix,iy);
-    double T3 =   T_3(ix,iy);
-
-    // calculate relaxation times from macroscopic properties
-    double tauf2 = mu/(rho2*R*T2);
-    double tauh2 = tauf2/Pr;
-    double tauhf2 = (tauh2*tauf2)/(tauf2 - tauh2);
-
-    double tauf3 = mu/(rho3*R*T3);
-    double tauh3 = tauf3/Pr;
-    double tauhf3 = (tauh3*tauf3)/(tauf3 - tauh3);
-    double feq2[Ni];
-    double heq2[Ni];
-
-    double feq3[13];
-    double heq3[13];
-
-    clEq2D(rho2, ux2, uy2, T2, feq2, heq2);
-    clEq2D(rho3, ux3, uy3, T3, feq3, heq3);
-
-    int id = BND(ix,iy);
-    int type = CELL(id);
-
-    double flux_f2, flux_h2, flux_f3, flux_h3, edotu2, edotu3;
-    double f2_, f3_, h2_, h3_;
-
-    for (int i = 0; i < Ni; i++) {
         // --- RK COMBINATION ----
         // calculate the updated distribution functions
-        if (type > 0) {
-            continue;
-        }
-        else {
-            f2_ = FR2(ix,iy,i);
-            f3_ = FR3(ix,iy,i);
+    if (type == 0) {
+        for (int i = 0; i < Ni; i++) {
+            flux_f = clCombineFLUX(fr1_flux_x, fr1_flux_y, i);
 
-            flux_f2 = clCombineFLUX(fr2_flux_x, fr2_flux_y, i);
-            flux_f3 = clCombineFLUX(fr3_flux_x, fr3_flux_y, i);
+            F_G(ix,iy,i) = F_G(ix,iy,i) - flux_f + (dt/tauf)*(feq[i] - FR1(ix,iy,i));
 
-            F_G(ix,iy,i) = F_G(ix,iy,i) - (1.0/2.0)*(flux_f2 + flux_f3) + (dt/2.0)*((feq2[i] - f2_)/tauf2 + (feq3[i] - f3_)/tauf3);
+            flux_h = clCombineFLUX(hr1_flux_x,hr1_flux_y, i);
 
-            h2_ = HR2(ix,iy,i);
-            h3_ = HR3(ix,iy,i);
+            edotu = ex[i]*ux + ey[i]*uy;
 
-            flux_h2 = clCombineFLUX(hr2_flux_x, hr2_flux_y, i);
-            flux_h3 = clCombineFLUX(hr3_flux_x, hr3_flux_y, i);
-
-            edotu2 = ex[i]*ux2 + ey[i]*uy2;
-            edotu3 = ex[i]*ux3 + ey[i]*uy3;
-
-            H_G(ix,iy,i) = H_G(ix,iy,i) - 0.5*(flux_h2 + flux_h3) + (dt/2.0)*((heq2[i] - h2_)/tauh2 + (heq3[i] - h3_)/tauh3) 
-                - (dt/2.0)*((edotu2/tauhf2)*(feq2[i] - f2_) + (edotu3/tauhf3)*(feq3[i] - f3_));
+            H_G(ix,iy,i) = H_G(ix,iy,i) - flux_h + (dt/tauh)*(heq[i] - HR1(ix,iy,i)) - ((dt*edotu)/tauhf)*(feq[i] - FR1(ix,iy,i));
         }
     }
     // update macro properties
     clMacroProp(f_G, h_G, rho_G, ux_G, uy_G, T_G);
 }
+
