@@ -18,7 +18,7 @@ class Setup:
     Pr = 0.71       #Prandtl number
     
     RKMETHOD = 1
-    FMETHOD = 1
+    FMETHOD = 0
     CFL = 0.5
     dtau = 0.0
     tt_tref = 0.0
@@ -34,8 +34,10 @@ class Setup:
     rho_ref = 0.0
     p_ref = 0.0
     T_ref = 0.0
+    S_v = 110.4
     Tc_Tref = 2.0
-    nPrintOut = 100
+    nPrintOut = 50
+    saveData = 1
     
     ##########################
     ## LISTS
@@ -55,20 +57,30 @@ class Setup:
         ##########################
         ## domain definition
         
-        multi = 1.0
+        ##########################
+        ## domain definition
         
-        self.Nx = 500     #number of elements in X
-        self.Ny = 500     #number of elements in Y
+        self.Nx = 100     #number of elements in X
+        self.Ny = 100    #number of elements in Y
         
         self.Lx = 0.5    #length of domain in X
-        self.Ly = self.Lx*multi #length of domain in y
+        self.Ly = 0.5 #length of domain in y
         
-        #uniform spacing
-        dx_ = self.Lx/self.Nx
-        dy_ = self.Ly/self.Ny
+        # grid generation                
+        dx1 = self.Lx/float(self.Nx)
+        dy1 = 0.5*self.Ly/float(self.Ny)
         
-        self.dx = dx_*ones((self.Nx),dtype=float64)
-        self.dy = dy_*ones((self.Ny),dtype=float64)
+        dx_ = (2.0*(self.Lx-self.Nx*dx1))/(self.Nx*(self.Nx-1))
+        dy_ = (2.0*(self.Ly-self.Ny*dy1))/(self.Ny*(self.Ny-1))
+        
+        self.dx = zeros((self.Nx),dtype=float64)
+        self.dy = zeros((self.Ny),dtype=float64)
+        
+        for i in range(self.Nx):
+            self.dx[i] = dx1 + i*dx_
+            
+        for i in range(self.Ny):
+            self.dy[i] = dy1 + i*dy_
         
         
         ##########################
@@ -138,7 +150,7 @@ class Setup:
         ## REFERENCE QUANTITIES
         
         self.rho_ref = rho0
-        self.p_ref = p0
-        self.T_ref = self.p_ref/(self.rho_ref*self.R)
+        self.T_ref = 273.0
+        self.p_ref = self.rho_ref*self.R*self.T_ref;
         
 # END

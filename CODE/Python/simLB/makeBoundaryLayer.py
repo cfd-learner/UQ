@@ -15,16 +15,15 @@ class Setup:
     
     R = 287.0       #gas constant J/kgK
     gamma = 1.4      # ratio of specific heats
-    mu = 1.86e-5    #dynamic viscosity
-    Pr = 0.71       #Prandtl number
+    Pr = 0.72       #Prandtl number
     
-    RKMETHOD = 0
+    RKMETHOD = 1
     FMETHOD = 0
-    CFL = 0.1
+    CFL = 0.5
     dtau = 0.0
     tt_tref = 0.0
-    tt_time = 0.0
-    steps = 10000
+    tt_time = 0.01
+    steps = 0
     tol = 0.0
     periodicX = 0
     periodicY = 0
@@ -34,27 +33,37 @@ class Setup:
     mirrorWest = 0
     rho_ref = 0.0
     p_ref = 0.0
-    T_ref = 0.0
-    Tc_Tref = 3.0
-    nPrintOut = 100
+    T_ref = 293.0
+    S_v = 110.4
+    Tc_Tref = 2.0
+    nPrintOut = 500
+    saveData = 1
     
     def initialise(self):
         ##########################
         ## domain definition
         
-        self.Nx = 50     #number of elements in X
-        self.Ny = 100    #number of elements in Y
+        self.Nx = 52     #number of elements in X
+        self.Ny = 125    #number of elements in Y
         
         self.Lx = 1.0    #length of domain in X
-        self.Ly = 0.6 #length of domain in y
+        self.Ly = 0.68 #length of domain in y
         
-        #uniform spacing
-        dx_ = self.Lx/self.Nx
-        dy_ = self.Ly/self.Ny
+        # grid generation                
+        dx1 = 0.0005 #self.Lx/float(self.Nx)
+        dy1 = 0.005 #self.Ly/float(self.Ny)
         
-        self.dx = dx_*ones((self.Nx),dtype=float64)
-        self.dy = dy_*ones((self.Ny),dtype=float64)
+        dx_ = (2.0*(self.Lx-self.Nx*dx1))/(self.Nx*(self.Nx-1))
+        dy_ = (2.0*(self.Ly-self.Ny*dy1))/(self.Ny*(self.Ny-1))
         
+        self.dx = zeros((self.Nx),dtype=float64)
+        self.dy = zeros((self.Ny),dtype=float64)
+        
+        for i in range(self.Nx):
+            self.dx[i] = dx1 + i*dx_
+            
+        for i in range(self.Ny):
+            self.dy[i] = dy1 + i*dy_
         
         ##########################
         ## domain
@@ -79,20 +88,26 @@ class Setup:
         
         for x in range(self.Nx):
             x_ += self.dx[x]
-            y_ = -self.dy[0]/2.0
             self.X[x] = x_
-            for y in range(self.Ny):
-                y_ += self.dy[y]
-                self.Y[y] = y_
+            
+        for y in range(self.Ny):
+            y_ += self.dy[y]
+            self.Y[y] = y_
                     
         
         ## VALUES FOR FLUID
         
-        rho0 = 1.165
-        p0 = 101310.0
-        T0 = p0/(rho0*self.R)
-        ux0 = 2.0*sqrt(self.R*T0)
+        Re = 1.65e6
+        
+        rho0 = 0.0404
+        T0 = 222.0
+        p0 = rho0*self.R*T0
+        ux0 = 2.0*sqrt(self.gamma*self.R*T0)
         uy0 = 0.0
+        
+        self.mu = (rho0*ux0*self.Lx)/Re
+        
+        
         
         ##########################
         ## SIMULATION LISTS
@@ -113,7 +128,6 @@ class Setup:
         ## REFERENCE QUANTITIES
         
         self.rho_ref = rho0
-        self.p_ref = p0
-        self.T_ref = self.p_ref/(self.rho_ref*self.R)
+        self.p_ref = self.rho_ref*self.R*self.T_ref;
         
 # END
