@@ -1,0 +1,27 @@
+%power law
+
+a = 1;
+k = 3;
+
+f = @(x) a*x^k;
+
+N = 100;
+
+x = zeros(N,1);
+y = zeros(N,1);
+
+for i = 1:N
+    x(i) = f(i);
+    y(i) = f(i);
+end
+
+maxX = max(x);
+minX = min(x);
+
+maxY = max(y);
+minY = min(y);
+
+x = (x-minX)/(maxX-minX);
+y = (y-minX)/(maxX-minX);
+
+plot(x)
