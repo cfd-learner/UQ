@@ -1,6 +1,6 @@
 // kernel.cl
 
-#pragma OPENCL EXTENSION cl_amd_fp64 : enable 
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable 
 
 /////////////////////////////////////////
 //MACROS 
@@ -31,8 +31,8 @@
 //CONSTANTS 
 /////////////////////////////////////////
 
-#define Nx 100
-#define Ny 100
+#define Nx 200
+#define Ny 300
 #define Ni 13 
 
 __constant double mu = 1.86e-05;
@@ -44,20 +44,20 @@ __constant double K = 3.0;
 __constant double b = 5.0;
 __constant double Tc = 546.0;
 
-__constant double dt = 1.57885682074e-06;
+__constant double dt = 9.47314092442e-07;
 
-__constant int periodicX = 1;
-__constant int periodicY = 1;
-__constant int mirrorN = 0;
-__constant int mirrorS = 0;
-__constant int mirrorE = 0;
-__constant int mirrorW = 0;
+__constant int periodicX = 0;
+__constant int periodicY = 0;
+__constant int mirrorN = 1;
+__constant int mirrorS = 1;
+__constant int mirrorE = 1;
+__constant int mirrorW = 1;
 
 __constant double ex[13] = {0.0, 395.856034437, 0.0, -395.856034437, 0.0, 395.856034437, -395.856034437, -395.856034437, 395.856034437, 791.712068874, 0.0, -791.712068874, 0.0};
 __constant double ey[13] = {0.0, 0.0, 395.856034437, 0.0, -395.856034437, 395.856034437, 395.856034437, -395.856034437, -395.856034437, 0.0, 791.712068874, 0.0, -791.712068874};
 
-__constant double dx[100] = {0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005, 0.005};
-__constant double dy[100] = {0.0025, 0.00255050505051, 0.00260101010101, 0.00265151515152, 0.00270202020202, 0.00275252525253, 0.00280303030303, 0.00285353535354, 0.00290404040404, 0.00295454545455, 0.00300505050505, 0.00305555555556, 0.00310606060606, 0.00315656565657, 0.00320707070707, 0.00325757575758, 0.00330808080808, 0.00335858585859, 0.00340909090909, 0.0034595959596, 0.0035101010101, 0.00356060606061, 0.00361111111111, 0.00366161616162, 0.00371212121212, 0.00376262626263, 0.00381313131313, 0.00386363636364, 0.00391414141414, 0.00396464646465, 0.00401515151515, 0.00406565656566, 0.00411616161616, 0.00416666666667, 0.00421717171717, 0.00426767676768, 0.00431818181818, 0.00436868686869, 0.00441919191919, 0.0044696969697, 0.0045202020202, 0.00457070707071, 0.00462121212121, 0.00467171717172, 0.00472222222222, 0.00477272727273, 0.00482323232323, 0.00487373737374, 0.00492424242424, 0.00497474747475, 0.00502525252525, 0.00507575757576, 0.00512626262626, 0.00517676767677, 0.00522727272727, 0.00527777777778, 0.00532828282828, 0.00537878787879, 0.00542929292929, 0.0054797979798, 0.0055303030303, 0.00558080808081, 0.00563131313131, 0.00568181818182, 0.00573232323232, 0.00578282828283, 0.00583333333333, 0.00588383838384, 0.00593434343434, 0.00598484848485, 0.00603535353535, 0.00608585858586, 0.00613636363636, 0.00618686868687, 0.00623737373737, 0.00628787878788, 0.00633838383838, 0.00638888888889, 0.00643939393939, 0.0064898989899, 0.0065404040404, 0.00659090909091, 0.00664141414141, 0.00669191919192, 0.00674242424242, 0.00679292929293, 0.00684343434343, 0.00689393939394, 0.00694444444444, 0.00699494949495, 0.00704545454545, 0.00709595959596, 0.00714646464646, 0.00719696969697, 0.00724747474747, 0.00729797979798, 0.00734848484848, 0.00739898989899, 0.00744949494949, 0.0075};
+__constant double dx[200] = {0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025};
+__constant double dy[300] = {0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025, 0.0025};
 
 __constant unsigned int mirrorNS[13] = {0,1,4,3,2,8,7,6,5,9,12,11,10};
 __constant unsigned int mirrorEW[13] = {0,3,2,1,4,6,5,8,7,11,10,9,12};
@@ -246,18 +246,22 @@ clIndex(int i, int pm, int d, int* mir)
 
     if (d == 0) {
         if (i < 0) {
-               i = Nx + i;
+               i = -i - 1;
+               (*mir) = 1;
         }
         else if (i > Nx - 1) {
-                i = i - Nx;
+                i = 2*Nx - i - 1;
+                (*mir) = 1;
         }
     }
     else if (d == 1) {
         if (i < 0) {
-               i = Ny + i;
+                i = -i - 1;
+                (*mir) = 1;
         }
         else if (i > Ny - 1) {
-                i = i - Ny;
+                i = 2*Ny - i - 1;
+                (*mir) = 1;
         }
     }
     return i;
@@ -289,7 +293,7 @@ clStencil(__global double* f,
     int exi = clSign(ex[i]);
     int eyi = clSign(ey[i]);
 
-    int low = 1;    // max/min num of stencil from centre
+    int low = 2;    // max/min num of stencil from centre
 
     // calculate stencil along x and y
     int jx1 = ix - exi*low;        //start of stencil index
@@ -299,12 +303,12 @@ clStencil(__global double* f,
 
     int sld_x = 0;
     int sld_y = 0;
-    int sldx[3];
-    int sldy[3];
+    int sldx[5];
+    int sldy[5];
 
     int id, type;
 
-    for (int j = 0; j < 3; j++) {
+    for (int j = 0; j < 5; j++) {
         // put together stencil along axis lines, start on low side, go to hi side: [j-low <-> j+low]
         jx = clIndex(jx1,exi*j,0,&mir_y);
         jy = clIndex(jy1,eyi*j,1,&mir_x);
@@ -343,7 +347,7 @@ clStencil(__global double* f,
 
     if (sld_x == 1) {
         // find where edge solid node is
-        for (int j = 0; j < 2; j++) {
+        for (int j = 0; j < 4; j++) {
             diff = sldx[j] - sldx[j+1];
             if (diff > 0) {
                 j_ = j;
@@ -366,7 +370,7 @@ clStencil(__global double* f,
 
         int j__ = j_ - diff;
 
-        if (j__ >= 0 && j__ < 3) { // update next one along if stencil is long enough
+        if (j__ >= 0 && j__ < 5) { // update next one along if stencil is long enough
             Sx[j__] = Sx[j_];
         }
     }
@@ -374,7 +378,7 @@ clStencil(__global double* f,
     if (sld_y == 1) {
 
         // find where edge solid node is
-        for (int j = 0; j < 2; j++) {
+        for (int j = 0; j < 4; j++) {
             diff = sldy[j] - sldy[j+1];
             if (diff > 0) {
                 j_ = j;
@@ -397,93 +401,67 @@ clStencil(__global double* f,
 
         int j__ = j_ - diff;
 
-        if (j__ >= 0 && j__ < 3) {    // update next one along if stencil is long enough
+        if (j__ >= 0 && j__ < 5) {    // update next one along if stencil is long enough
             Sy[j__] = Sy[j_];
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// clMinMod
+// clWENO5
 ////////////////////////////////////////////////////////////////////////////////
 
 double
-clMinmod(double a, double b)
+clWENO5(double* S, double e)
 {
-    // calculate minmod function
+    // calculate the flux term of the WENO5 scheme for one flow direction
 
-   double out;
-
-   if ((fabs(a) < fabs(b)) && (a*b > 0))
-       out = a;
-    else if ((fabs(b) < fabs(a)) && (a*b > 0))
-       out = b;
-    else if (a == b)
-       out = a;
-    else if (a*b <= 0)
-       out = 0;
-    return out;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// clNND
-////////////////////////////////////////////////////////////////////////////////
-
-double
-clNND(double* S, double e)
-{
-   // calculate the flux by the NND method (2nd order accurate, CFL_max = 2/3)
-
-    double Fp_I, Fp_Ip1, Fp_Im1;
-
-    double vP = fabs(e);
-
-    if (vP == 0) {
-        return 0;
-    }
-
-    Fp_I   = vP*S[1];
-    Fp_Ip1 = vP*S[2];
-    Fp_Im1 = vP*S[0];
-
-    double dFp_Ip12, dFp_Im12;
-
-    dFp_Ip12 = Fp_Ip1 - Fp_I;
-    dFp_Im12 = Fp_I - Fp_Im1;
-
+    double epsilon = (double) 1e-6;
+    double posFlow = fabs(e);
     double F_Ip12;
 
-    F_Ip12 = Fp_I + 0.5*clMinmod(dFp_Ip12,dFp_Im12);
+    if (posFlow == 0) {
+        return 0;
+    }
+    else {
+        double Sp[5];
+        for (int i = 0; i < 5; i++) {
+            Sp[i] = S[i]*posFlow;
+        }
+
+        double B0p, B1p, B2p, alpha0p, alpha1p, alpha2p;
+        double omega0p, omega1p, omega2p, f0p, f1p, f2p, temp1, temp2;
+
+        temp1 = Sp[0] - 2.0*Sp[1] + Sp[2];
+        temp2 = Sp[0] - 4.0*Sp[1] + 3.0*Sp[2];
+        B0p = 1.08333333333*temp1*temp1 + 0.25*temp2*temp2;
+        temp1 = Sp[1] - 2.0*Sp[2] + Sp[3];
+        temp2 = Sp[1] - Sp[3];
+        B1p = 1.08333333333*temp1*temp1 + 0.25*temp2*temp2;
+        temp1 = Sp[2] - 2.0*Sp[3] + Sp[3];
+        temp2 = 3.0*Sp[2] - 4.0*Sp[3] + Sp[4];
+        B2p = 1.08333333333*temp1*temp1 + 0.25*temp2*temp2;
+
+        temp1 = 1.0/(epsilon + B0p);
+        alpha0p = 0.1*temp1*temp1;
+        temp1 = 1.0/(epsilon + B1p);
+        alpha1p = 0.6*temp1*temp1;
+        temp1 = 1.0/(epsilon + B2p);
+        alpha2p = 0.3*temp1*temp1;
+
+        omega0p = alpha0p/(alpha0p + alpha1p + alpha2p);
+        omega1p = alpha1p/(alpha0p + alpha1p + alpha2p);
+        omega2p = alpha2p/(alpha0p + alpha1p + alpha2p);
+
+        f0p = 0.333333333333*Sp[0] - 1.16666666667*Sp[1] + 1.83333333333*Sp[2];
+        f1p = -0.166666666667*Sp[1] + 0.833333333333*Sp[2] + 0.333333333333*Sp[3];
+        f2p = 0.333333333333*Sp[2] + 0.833333333333*Sp[3] - 0.166666666667*Sp[4];
+
+        F_Ip12 = omega0p*f0p + omega1p*f1p + omega2p*f2p;
+
+    }
 
     return F_Ip12;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// clFLUX
-////////////////////////////////////////////////////////////////////////////////
-
-void
-clFLUX(__global double* f, int i, __global int* cell, __global int* bnd, double* flux_x, double* flux_y)
-{
-    // choose flux method
-
-    double exi, eyi;
-
-    exi = ex[i];
-    eyi = ey[i];
-
-    // calculate area of flux
-    double areaX = dy[i]; // assume dz = 1
-    double areaY = dx[i];
-    //NND
-    double Sx[3];
-    double Sy[3];
-
-    clStencil(f, Sx, Sy, i, cell, bnd);
-
-    (*flux_x) = areaX*clNND(Sx,exi);
-    (*flux_y) = areaY*clNND(Sy,eyi);
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -495,7 +473,7 @@ clFLUX(__global double* f, int i, __global int* cell, __global int* bnd, double*
 double
 clCombineFLUX(__global double* flux_x, __global double* flux_y, int i)
 {
-    // calculates the combined flux given all the fluxes out of each node, input is kg, output is kg/m^3
+    // calculates the combined flux given all the fluxes out of each node, input is kg/s, output is kg/m^3
 
     if (i == 0) {
 
@@ -522,12 +500,36 @@ clCombineFLUX(__global double* flux_x, __global double* flux_y, int i)
 
         clMirIndex(i,mir_x,mir_y,&i_x,&i_y);    // mirror indexes if required
 
-        double flux_out = FLUX_X(ix,iy,i) + FLUX_Y(ix,iy,i);
-
+        double flux_out = FLUX_X(ix,iy,i)  +  FLUX_Y(ix,iy,i);
         double flux_in =  FLUX_X(x_,iy,i_y) + FLUX_Y(ix,y_,i_x);
 
         return (flux_out - flux_in)*(dt/vol);
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// clFLUX
+////////////////////////////////////////////////////////////////////////////////
+
+void
+clFLUX(__global double* f, int i, __global int* cell, __global int* bnd, double* flux_x, double* flux_y)
+{
+    // choose flux method
+
+    double exi, eyi;
+
+    exi = ex[i];
+    eyi = ey[i];
+
+    // WENO5
+    double Sx[5];
+    double Sy[5];
+
+    clStencil(f, Sx, Sy, i, cell, bnd);
+
+    (*flux_x) = clWENO5(Sx, exi);
+    (*flux_y) = clWENO5(Sy, eyi);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -562,14 +564,105 @@ clPosFlux(__global double* f,
         clFLUX(h,i,cell,bnd,&flux_hx,&flux_hy);
 
         // store fluxes in global memory
-        F_FLUX_X(ix,iy,i) = flux_fx;
-        F_FLUX_Y(ix,iy,i) = flux_fy;
+        F_FLUX_X(ix,iy,i) = dy[iy]*flux_fx;
+        F_FLUX_Y(ix,iy,i) = dx[ix]*flux_fy;
 
-        H_FLUX_X(ix,iy,i) = flux_hx;
-        H_FLUX_Y(ix,iy,i) = flux_hy;
+        H_FLUX_X(ix,iy,i) = dy[iy]*flux_hx;
+        H_FLUX_Y(ix,iy,i) = dx[ix]*flux_hy;
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//KERNEL: WALL_FLUXES
+////////////////////////////////////////////////////////////////////////////////
+
+__kernel void 
+WALL_FLUXES(__global double* f_flux_x,
+    __global double* f_flux_y,
+    __global double* h_flux_x,
+    __global double* h_flux_y,
+    __global int* cell,
+    __global int* bnd,
+    __global double* therm,
+    __global double* velX,
+    __global double* velY)
+{
+    // calculate fluxes into solid nodes and set fluxes out of solid to cancel them out
+
+    // global index
+    size_t ix = get_global_id(0);
+    size_t iy = get_global_id(1);
+
+    int xm1, ym1, i, inv_i;
+    int mir_x, mir_y;
+
+    double flux_in, flux_out, alpha;
+
+    double feqW[Ni];
+    double heqW[Ni];
+
+    double ux, uy;
+    int inx,iny;
+    int id = BND(ix,iy);
+    int type = CELL(id);
+
+    if ( type == 2) {    //wall nodes
+
+        flux_in = 0;
+        flux_out = 0;
+
+        // calculate volume of wall cell
+        double volWall = dx[ix]*dy[iy];
+
+        // calculate area of flux
+        double areaX = dy[iy]; // assume dz = 1
+        double areaY = dx[ix];
+        clEq2D(1.0, VELX(id), VELY(id), THERM(id), feqW, heqW);
+
+        // check surrounds for fluid node
+        for (int j = 0; j < 4; j++) {
+            xm1 = clIndex(ix,xx[j],0,&mir_y);
+            ym1 = clIndex(iy,yy[j],1,&mir_x);
+
+            id = BND(xm1,ym1);
+            type = CELL(id);
+
+            if (type != 2) { // if fluid
+
+                for (int k = 0; k < 4; k++) {
+                    i = ii[j][k];    // index of velocities into solid
+                    inv_i = inv[j][k];    // inverted velocities, out of solid
+
+                    // switches for turning off velocities that don't impinge on solid, or leave solid, through the cell pointed to by xx & yy
+                    inx = abs(xx[j]);    
+                    iny = abs(yy[j]);
+
+                    flux_in += inx*F_FLUX_X(xm1,ym1,i) + iny*F_FLUX_Y(xm1,ym1,i);        // flux into solid - kg/s
+
+                    // absolute value of velocities
+                    ux = fabs(ex[inv_i]);    
+                    uy = fabs(ey[inv_i]);
+
+                    flux_out += inx*feqW[inv_i]*ux*areaX + iny*feqW[inv_i]*uy*areaY;                // flux out of solid, back along inverse velocity
+                }
+            }
+        }
+
+        alpha = flux_in/flux_out;    // correction factor to equalise flux in to flux out
+
+        // load required fluxes into flux array
+        for (int i = 0; i < 13; i++) {
+            ux = fabs(ex[i]);    
+            uy = fabs(ey[i]);
+
+             F_FLUX_X(ix,iy,i) = alpha*ux*feqW[i]*areaX;
+             F_FLUX_Y(ix,iy,i) = alpha*uy*feqW[i]*areaY;
+
+             H_FLUX_X(ix,iy,i) = alpha*ux*heqW[i]*areaX;
+             H_FLUX_Y(ix,iy,i) = alpha*uy*heqW[i]*areaY;
+        }
+    }
+}
 ////////////////////////////////////////////////////////////////////////////////
 // clMacroProp
 ////////////////////////////////////////////////////////////////////////////////
@@ -741,97 +834,6 @@ GLOBAL_FLUXES(__global double* f,
 
         // calc fluxes, save to global
         clPosFlux(f, h, i, cell, bnd, f_flux_x, f_flux_y, h_flux_x, h_flux_y);
-    }
-}
-////////////////////////////////////////////////////////////////////////////////
-//KERNEL: WALL_FLUXES
-////////////////////////////////////////////////////////////////////////////////
-
-__kernel void 
-WALL_FLUXES(__global double* f_flux_x,
-    __global double* f_flux_y,
-    __global double* h_flux_x,
-    __global double* h_flux_y,
-    __global int* cell,
-    __global int* bnd,
-    __global double* therm,
-    __global double* velX,
-    __global double* velY)
-{
-    // calculate fluxes into solid nodes and set fluxes out of solid to cancel them out
-
-    // global index
-    size_t ix = get_global_id(0);
-    size_t iy = get_global_id(1);
-
-    int xm1, ym1, i, inv_i;
-    int mir_x, mir_y;
-
-    double flux_in, flux_out, alpha;
-
-    double feqW[Ni];
-    double heqW[Ni];
-
-    double ux, uy;
-    int inx,iny;
-    int id = BND(ix,iy);
-    int type = CELL(id);
-
-    if ( type == 2) {    //wall nodes
-
-        flux_in = 0;
-        flux_out = 0;
-
-        // calculate volume of wall cell
-        double volWall = dx[ix]*dy[iy];
-
-        // calculate area of flux
-        double areaX = dy[i]; // assume dz = 1
-        double areaY = dx[i];
-        clEq2D(1.0, VELX(id), VELY(id), THERM(id), feqW, heqW);
-
-        // check surrounds for fluid node
-        for (int j = 0; j < 4; j++) {
-            xm1 = clIndex(ix,xx[j],0,&mir_y);
-            ym1 = clIndex(iy,yy[j],1,&mir_x);
-
-            id = BND(xm1,ym1);
-            type = CELL(id);
-
-            if (type != 2) { // if fluid
-
-                for (int k = 0; k < 4; k++) {
-                    i = ii[j][k];    // index of velocities into solid
-                    inv_i = inv[j][k];    // inverted velocities, out of solid
-
-                    // switches for turning off velocities that don't impinge on solid, or leave solid, through the cell pointed to by xx & yy
-                    inx = abs(xx[j]);    
-                    iny = abs(yy[j]);
-
-                    flux_in += inx*F_FLUX_X(xm1,ym1,i) + iny*F_FLUX_Y(xm1,ym1,i);        // flux into solid - kg/s
-
-                    // absolute value of velocities
-                    ux = fabs(ex[inv_i]);    
-                    uy = fabs(ey[inv_i]);
-
-                    flux_out += inx*feqW[inv_i]*ux*areaX + iny*feqW[inv_i]*uy*areaY;                // flux out of solid, back along inverse velocity
-                }
-            }
-        }
-
-        alpha = flux_in/flux_out;    // correction factor to equalise flux in to flux out
-
-        // load required fluxes into flux array
-        for (int i = 0; i < 13; i++) {
-            ux = fabs(ex[i]);    
-            uy = fabs(ey[i]);
-
-             F_FLUX_X(ix,iy,i) = alpha*ux*feqW[i]*areaX;
-             F_FLUX_Y(ix,iy,i) = alpha*uy*feqW[i]*areaY;
-
-             H_FLUX_X(ix,iy,i) = alpha*ux*heqW[i]*areaX;
-             H_FLUX_Y(ix,iy,i) = alpha*uy*heqW[i]*areaY;
-        }
     }
 }
 ////////////////////////////////////////////////////////////////////////////////

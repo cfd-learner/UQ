@@ -37,7 +37,7 @@ class Setup:
     S_v = 110.4
     Tc_Tref = 2.0
     nPrintOut = 50
-    saveData = 1
+    saveData = 0
     
     ##########################
     ## LISTS
@@ -60,15 +60,15 @@ class Setup:
         ##########################
         ## domain definition
         
-        self.Nx = 100     #number of elements in X
-        self.Ny = 100    #number of elements in Y
+        self.Nx = 500     #number of elements in X
+        self.Ny = 500   #number of elements in Y
         
         self.Lx = 0.5    #length of domain in X
         self.Ly = 0.5 #length of domain in y
         
         # grid generation                
-        dx1 = 0.5*self.Lx/float(self.Nx)
-        dy1 = 0.5*self.Ly/float(self.Ny)
+        dx1 = self.Lx/float(self.Nx)
+        dy1 = self.Ly/float(self.Ny)
         
         dx_ = (2.0*(self.Lx-self.Nx*dx1))/(self.Nx*(self.Nx-1))
         dy_ = (2.0*(self.Ly-self.Ny*dy1))/(self.Ny*(self.Ny-1))

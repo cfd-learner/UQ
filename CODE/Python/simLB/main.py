@@ -46,10 +46,12 @@ def plotData(data_D, data_H):
 
     return s
 
-def plotUpdate(s, data_H):
+def plotUpdate(s, data_D, data_H):
     """
     update figure initialised by plotData()
     """
+    
+    cl.enqueue_read_buffer(lbm.queue, data_D, data_H).wait()
     
     s.mlab_source.scalars = data_H
     
@@ -61,14 +63,15 @@ def plotUpdate(s, data_H):
 #  string indicates the initialisation script to use
 
 lbm = ClassLBM("makeQuarterCircle")
+#lbm = ClassLBM("makeFullCircle")
 #lbm = ClassLBM("makeLaxLiu3")
 #lbm = ClassLBM("makeBoundaryLayer")
 
 #initialise plot
 fig1 = plotData(lbm.rho_D, lbm.rho_H)
 fig2 = plotData(lbm.T_D, lbm.T_H)
-fig3 = plotData(lbm.ux_D, lbm.ux_H)
-fig4 = plotData(lbm.uy_D, lbm.uy_H)
+#fig3 = plotData(lbm.ux_D, lbm.ux_H)
+#fig4 = plotData(lbm.uy_D, lbm.uy_H)
 
 t0 = time.clock()
 
@@ -77,10 +80,10 @@ for i in range(lbm.steps):
     lbm.runSimStep()
     
     if i%lbm.nPrintOut == 0:
-        plotUpdate(fig1, lbm.rho_H)
-        plotUpdate(fig2, lbm.T_H)
-        plotUpdate(fig3, lbm.ux_H)
-        plotUpdate(fig4, lbm.uy_H)
+        plotUpdate(fig1, lbm.rho_D, lbm.rho_H)
+        plotUpdate(fig2, lbm.T_D, lbm.T_H)
+        #plotUpdate(fig3, lbm.ux_D, lbm.ux_H)
+        #plotUpdate(fig4, lbm.uy_D, lbm.uy_H)
         
     if i == lbm.steps - 1:
         mlab.show()

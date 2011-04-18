@@ -18,7 +18,7 @@ class Setup:
     Pr = 0.72       #Prandtl number
     
     RKMETHOD = 1
-    FMETHOD = 0
+    FMETHOD = 1
     CFL = 0.5
     dtau = 0.0
     tt_tref = 0.0
