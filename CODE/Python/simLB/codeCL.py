@@ -18,8 +18,8 @@ def genOpenCL(input,ex,ey,dx,dy):
     f = open(fileName,'wt')
     f.write('// {}\n\n'.format(fileName))
     #f.write('#pragma OPENCL EXTENSION cl_amd_printf : enable \n')
-    #f.write('#pragma OPENCL EXTENSION cl_amd_fp64 : enable \n\n')
-    f.write('#pragma OPENCL EXTENSION cl_khr_fp64 : enable \n\n')
+    f.write('#pragma OPENCL EXTENSION cl_amd_fp64 : enable \n\n')
+    #f.write('#pragma OPENCL EXTENSION cl_khr_fp64 : enable \n\n')
             
     #f.write('#pragma OPENCL EXTENSION cl_intel_printf : enable \n')
     #f.write('#pragma OPENCL EXTENSION cl_intel_fp64 : enable \n\n')

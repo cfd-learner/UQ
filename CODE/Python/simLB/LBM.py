@@ -66,12 +66,12 @@ class ClassLBM:
         
         # select device
         for found_platform in cl.get_platforms():
-            if found_platform.name == platform[0]:
+            if found_platform.name == platform[1]:
                 my_platform = found_platform;
         
         for found_device in my_platform.get_devices():
-            #if found_device.name[0:5] == device[2]:
-            if found_device.name == deviceName[0]:
+            if found_device.name[0:5] == deviceName[2]:
+            #if found_device.name == deviceName[0]:
                 device = found_device
         
 
@@ -120,7 +120,6 @@ class ClassLBM:
         self.mirrorEast  = simSetup.mirrorEast
         self.mirrorWest = simSetup.mirrorWest
         self.rho_ref = simSetup.rho_ref
-        self.p_ref = simSetup.p_ref
         self.T_ref = simSetup.T_ref
         self.S_v = simSetup.S_v
         self.Tc_Tref = simSetup.Tc_Tref
@@ -136,15 +135,12 @@ class ClassLBM:
         
         self.numProps = simSetup.numProps
         self.density =   simSetup.density
-        self.pressure =  simSetup.pressure
         self.therm =      simSetup.therm
         self.velX = simSetup.velX
         self.velY = simSetup.velY
 
         ##########################
         ## REFINE INPUT
-        
-        self.refineInput()
         self.setupVars()
         
         ##########################
@@ -178,31 +174,6 @@ class ClassLBM:
             
             if not os.path.exists(self.resultsPath):
                 os.makedirs(self.resultsPath)
-        
-        
-    
-    def refineInput(self):
-        """
-        refine the input variables so that all required fields are populated
-        with correct data
-        """
-        
-        # define reference values
-        if self.rho_ref == 0.0:
-            self.rho_ref = self.p_ref/(self.R*self.T_ref)
-        elif self.p_ref == 0.0:
-            self.p_ref = self.rho_ref*self.R*self.T_ref
-        elif self.T_ref == 0.0:
-            self.T_ref = self.p_ref/(self.rho_ref*self.R)
-        
-        # update flow properties
-        for r in range(self.numProps):
-            if self.density[r] == 0.0:
-                self.density[r] = self.pressure[r]/(self.R * self.therm[r])
-            elif self.pressure[r] == 0.0:
-                self.pressure[r] = self.density[r] * self.R * self.therm[r]
-            elif self.therm[r] == 0.0:
-                self.therm[r] = self.pressure[r]/(self.density[r] * self.R)
    
     def setupVars(self):
         """
@@ -216,7 +187,7 @@ class ClassLBM:
         
         # reference values
         self.Tc = self.Tc_Tref*self.T_ref      # characteristic temperature, K
-        self.tau_ref = self.mu/self.p_ref;      # reference relaxation time
+        self.tau_ref = self.mu/(self.R*self.rho_ref*self.T_ref)      # reference relaxation time
         self.u_ref = sqrt(self.R * self.T_ref)  #reference velocity
         self.t_ref = max(self.Lx,self.Ly)/self.u_ref    # reference time
         
@@ -550,6 +521,22 @@ class ClassLBM:
     
         f["t"] = self.step*self.dt
         
+        f["gamma"] = self.gamma
+        
+        f["R"] = self.R
+        
+        f["T_ref"] = self.T_ref
+        
+        f["rho_ref"] = self.rho_ref
+        
+        f["dx"] = self.dx
+        
+        f["dy"] = self.dy
+        
+        f["Nx"] = self.Nx
+        
+        f["Ny"] = self.Ny
+        
         if all == 1:
             #save all data
             cl.enqueue_read_buffer(self.queue, self.f_D, self.f_H).wait()
@@ -580,6 +567,9 @@ class ClassLBM:
             
             if ((self.step%self.nPrintOut == 0) | (self.step == self.steps))\
             & (self.saveData == 1):
-                self.saveHDF5()   
+                if self.step == self.steps:
+                    self.saveHDF5(1)
+                else:
+                    self.saveHDF5()
     
         

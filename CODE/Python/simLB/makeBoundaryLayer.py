@@ -7,6 +7,8 @@ boundary layer problem
 
 from numpy import *
 from numpy import linalg
+from pylab import *
+import bezier as bz
 
 class Setup:
     
@@ -19,11 +21,11 @@ class Setup:
     
     RKMETHOD = 1
     FMETHOD = 1
-    CFL = 0.5
+    CFL = 0.6
     dtau = 0.0
     tt_tref = 0.0
-    tt_time = 0.01
-    steps = 0
+    tt_time = 0
+    steps = 1
     tol = 0.0
     periodicX = 0
     periodicY = 0
@@ -32,12 +34,10 @@ class Setup:
     mirrorEast  = 0
     mirrorWest = 0
     rho_ref = 0.0
-    p_ref = 0.0
     T_ref = 293.0
     S_v = 110.4
-    Tc_Tref = 2.0
-    nPrintOut = 500
-    saveData = 1
+    nPrintOut = 1
+    saveData = 0
     
     def initialise(self):
         ##########################
@@ -50,8 +50,19 @@ class Setup:
         self.Ly = 0.68 #length of domain in y
         
         # grid generation                
-        dx1 = 0.0005 #self.Lx/float(self.Nx)
-        dy1 = 0.005 #self.Ly/float(self.Ny)
+        dx1 = 0.005 #self.Lx/float(self.Nx)
+        dy1 = 0.005*self.Ly/float(self.Ny)
+        
+        if dx1 > self.Lx/float(self.Nx):
+            dx1 = self.Lx/float(self.Nx)
+            print 'error: x spacing too large!!!'
+            print 'set x spacing to {}'.format(dx1)
+        
+        if dy1 > self.Ly/float(self.Ny):
+            dy1 = self.Ly/float(self.Ny)
+            print 'error: y spacing too large!!!'
+            print 'set y spacing to {}'.format(dy1)
+            
         
         dx_ = (2.0*(self.Lx-self.Nx*dx1))/(self.Nx*(self.Nx-1))
         dy_ = (2.0*(self.Ly-self.Ny*dy1))/(self.Ny*(self.Ny-1))
@@ -64,6 +75,18 @@ class Setup:
             
         for i in range(self.Ny):
             self.dy[i] = dy1 + i*dy_
+            
+        #grid gen using bezier curve
+        pts = [bz.pt(0,0), bz.pt(0.5,100), bz.pt(1.0,0)]
+        bc = bz.Bezier(pts)
+        dx = bz.xyBezier(bc,self.Nx)
+        dx = 1.0/(dx + 1.0)
+        dx = (self.Lx/sum(dx))*dx
+        self.dx = dx
+        
+        bz.plotCP(pts)
+        bz.plotBezier(bc,self.Nx)
+        show()
         
         ##########################
         ## domain
@@ -113,7 +136,6 @@ class Setup:
         ## SIMULATION LISTS
         self.numProps = 3
         self.density =   array([rho0, rho0, rho0],dtype=float64)
-        self.pressure =  array([p0, p0, p0],dtype=float64)
         self.therm =      array([T0, T0, T0],dtype=float64)
         self.velX = array([ux0, ux0, 0.0],dtype=float64)
         self.velY = array([uy0, uy0, 0.0],dtype=float64)
@@ -128,6 +150,8 @@ class Setup:
         ## REFERENCE QUANTITIES
         
         self.rho_ref = rho0
-        self.p_ref = self.rho_ref*self.R*self.T_ref;
+        maxVel = sqrt(max(abs(self.velX))**2 + max(abs(self.velY))**2)
+        self.Tc_Tref = (T0/self.T_ref)*(1.0 + (self.gamma - 1.0)/2.0)*(ux0/sqrt(self.gamma*self.R*T0))**2
+        print('Tc_Tref = {}'.format(self.Tc_Tref))
         
 # END

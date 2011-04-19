@@ -60,9 +60,9 @@ class Setup:
         ##########################
         ## domain definition
         
-        multi = 1.5
+        multi = 1.0
         
-        self.Nx = 200     #number of elements in X
+        self.Nx = 50     #number of elements in X
         self.Ny = int(self.Nx*multi)    #number of elements in Y
         
         self.Lx = 0.5    #length of domain in X
@@ -94,7 +94,6 @@ class Setup:
         self.bnd = zeros((self.Nx, self.Ny),dtype=uint32)
         
         x_ = -self.dx[0]/2.0
-        y_ = -self.dy[0]/2.0
         
         self.X = zeros((self.Nx),dtype=float64)
         self.Y = zeros((self.Ny),dtype=float64)

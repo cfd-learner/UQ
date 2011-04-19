@@ -42,7 +42,7 @@ def plotData(data_D, data_H):
     #plot lines
     if 1:
         mlab.pipeline.surface(mlab.pipeline.extract_edges(s),
-                              color=(0, 0, 0),line_width = 0.1, opacity = 0.05)
+                              color=(0, 0, 0),line_width = 0.1, opacity = 0.1)
 
     return s
 
@@ -62,10 +62,10 @@ def plotUpdate(s, data_D, data_H):
 # generate and initialise the primary simulation class
 #  string indicates the initialisation script to use
 
-lbm = ClassLBM("makeQuarterCircle")
+#lbm = ClassLBM("makeQuarterCircle")
 #lbm = ClassLBM("makeFullCircle")
 #lbm = ClassLBM("makeLaxLiu3")
-#lbm = ClassLBM("makeBoundaryLayer")
+lbm = ClassLBM("makeBoundaryLayer")
 
 #initialise plot
 fig1 = plotData(lbm.rho_D, lbm.rho_H)
@@ -84,13 +84,14 @@ for i in range(lbm.steps):
         plotUpdate(fig2, lbm.T_D, lbm.T_H)
         #plotUpdate(fig3, lbm.ux_D, lbm.ux_H)
         #plotUpdate(fig4, lbm.uy_D, lbm.uy_H)
-        
-    if i == lbm.steps - 1:
-        mlab.show()
 
-    print('step {}/{}'.format(i,lbm.steps))
+    print('step {}/{}'.format(i+1,lbm.steps))
 
 t = time.clock() - t0
 
 print('total time elapsed = {}'.format(t))
+
+mlab.show()
+
+
 
