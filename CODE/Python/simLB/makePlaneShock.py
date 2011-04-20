@@ -17,7 +17,7 @@ class Setup:
     ## SIMULATION PARAMETERS
     
     R = 287.0       #gas constant J/kgK
-    gamma = 1.4      # ratio of specific heats
+    gamma = 5.0/3.0      # ratio of specific heats
     Pr = 0.72       #Prandtl number
     
     RKMETHOD = 1
@@ -34,18 +34,46 @@ class Setup:
     mirrorSouth = 0
     mirrorEast  = 0
     mirrorWest = 0
-    rho_ref = 0.0
-    T_ref = 293.0
-    S_v = 110.4
+    
     nPrintOut = 100
     saveData = 0
+    
+    mu_model = 'GHS'    #GHS, sutherland, const
+    if mu_model == 'sutherland':
+        T_ref = 293.0
+        S_v = 110.4
+    elif mu_model == 'GHS':
+        ups1 = 2.0/13.0
+        ups2 = 14.0/13.0
+        phi = 0.61
+        #gas props
+        m = 66.3e-27    #kg
+        sigma0 = 6.457e-19  #m^2
+        mu0 = 2.272e-5  #N/ms
+        T_ref = 300 #K
     
     def initialise(self):
         ##########################
         ## domain definition
         
-        self.Nx = 52     #number of elements in X
-        self.Ny = 125    #number of elements in Y
+        # GAS PROPERTIES 1
+        T1 = 150.0
+        mu1 = 1.237e-5
+        M1 = 4.0
+        
+        # GAS PROPERTIES 2
+        T2 = T1*((2.0+(gamma-1.0)*M1**2)*((2*gamma*M1**2-(gamma-1.0))/((gamma+1.0)**2*M1**2)))
+        
+        g0 = (4.0*self.R*self.T_ref)**0.5
+        S = S0*(T_ref/T2)**(ups2-ups1)
+        
+        mu2 = 
+        
+        # mean free path
+        lambda1 = (2.0*mu)/(rho0*sqrt((8*R*T0)/pi))
+        
+        self.Nx = 100     #number of elements in X
+        self.Ny = 2    #number of elements in Y
         
         self.Lx = 1.0    #length of domain in X
         self.Ly = 0.68 #length of domain in y

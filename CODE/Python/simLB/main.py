@@ -12,6 +12,7 @@ was originally coded in C++/CUDA
 import numpy as np
 
 from enthought.mayavi import mlab
+from enthought.tvtk.api import tvtk
 
 from LBM import ClassLBM
 
@@ -23,7 +24,7 @@ import pyopencl as cl
 ## FUNCTIONS
 #########################
 
-def plotData(data_D, data_H):
+def plotData(data_D, data_H, dataTitle):
     """
     plot passed in data as a surface
     """
@@ -34,26 +35,39 @@ def plotData(data_D, data_H):
     
     cl.enqueue_read_buffer(lbm.queue, data_D, data_H).wait()
     
-    X, Y = np.meshgrid(lbm.Y, lbm.X)
-    Z = np.zeros((lbm.Nx, lbm.Ny))
+    rgrid = tvtk.RectilinearGrid()
+    rgrid.cell_data.scalars = data_H.ravel()
+    rgrid.cell_data.scalars.name = 'scalars'
     
-    s = mlab.mesh(X,Y,Z, scalars = data_H, colormap = 'jet')
+    
+    rgrid.dimensions = np.array((lbm.Ny+1, lbm.Nx+1, 1))
+    rgrid.x_coordinates = lbm.Y
+    rgrid.y_coordinates = lbm.X
+    rgrid.z_coordinates = np.array([0.0])
+    
+    src = mlab.pipeline.add_dataset(rgrid)
+    s = mlab.pipeline.cell_to_point_data(src)
+    s = mlab.pipeline.surface(s)
+    sb = mlab.scalarbar(s, title = dataTitle)
     
     #plot lines
     if 1:
-        mlab.pipeline.surface(mlab.pipeline.extract_edges(s),
-                              color=(0, 0, 0),line_width = 0.1, opacity = 0.1)
+        mlab.pipeline.surface(mlab.pipeline.extract_edges(src),
+                              color=(0, 0, 0),line_width = 0.1, opacity = 0.05)
 
-    return s
+    return rgrid, src
 
-def plotUpdate(s, data_D, data_H):
+def plotUpdate(rgrid, src, data_D, data_H):
     """
     update figure initialised by plotData()
     """
     
     cl.enqueue_read_buffer(lbm.queue, data_D, data_H).wait()
     
-    s.mlab_source.scalars = data_H
+    rgrid.cell_data.scalars = data_H.ravel()
+    rgrid.cell_data.scalars.name = 'scalars'
+    rgrid.modified()
+    src.update()
     
 #########################
 ## MAIN FUNCTIONALITY
@@ -62,16 +76,16 @@ def plotUpdate(s, data_D, data_H):
 # generate and initialise the primary simulation class
 #  string indicates the initialisation script to use
 
-#lbm = ClassLBM("makeQuarterCircle")
+lbm = ClassLBM("makeQuarterCircle")
 #lbm = ClassLBM("makeFullCircle")
 #lbm = ClassLBM("makeLaxLiu3")
-lbm = ClassLBM("makeBoundaryLayer")
+#lbm = ClassLBM("makeBoundaryLayer")
 
 #initialise plot
-fig1 = plotData(lbm.rho_D, lbm.rho_H)
-fig2 = plotData(lbm.T_D, lbm.T_H)
-#fig3 = plotData(lbm.ux_D, lbm.ux_H)
-#fig4 = plotData(lbm.uy_D, lbm.uy_H)
+grid1, src1 = plotData(lbm.rho_D, lbm.rho_H, 'density')
+#grid2, src2 = plotData(lbm.T_D, lbm.T_H, 'temperature')
+#grid3, src3 = plotData(lbm.ux_D, lbm.ux_H, 'velocity X')
+#grid4, src4 = plotData(lbm.uy_D, lbm.uy_H, 'velocity Y')
 
 t0 = time.clock()
 
@@ -80,10 +94,10 @@ for i in range(lbm.steps):
     lbm.runSimStep()
     
     if i%lbm.nPrintOut == 0:
-        plotUpdate(fig1, lbm.rho_D, lbm.rho_H)
-        plotUpdate(fig2, lbm.T_D, lbm.T_H)
-        #plotUpdate(fig3, lbm.ux_D, lbm.ux_H)
-        #plotUpdate(fig4, lbm.uy_D, lbm.uy_H)
+        plotUpdate(grid1, src1, lbm.rho_D, lbm.rho_H)
+        #plotUpdate(grid2, src2, lbm.T_D, lbm.T_H)
+        #plotUpdate(grid3, src3, lbm.ux_D, lbm.ux_H)
+        #plotUpdate(grid4, src4, lbm.uy_D, lbm.uy_H)
 
     print('step {}/{}'.format(i+1,lbm.steps))
 

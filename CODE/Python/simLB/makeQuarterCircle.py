@@ -6,6 +6,7 @@ initialises all data for a simulation run involving a quarter circle
 
 from numpy import *
 from numpy import linalg
+import gridGen as gg
 
 class Setup:
     
@@ -68,22 +69,14 @@ class Setup:
         self.Lx = 0.5    #length of domain in X
         self.Ly = multi*self.Lx #length of domain in y
         
-        # grid generation                
-        dx1 = self.Lx/float(self.Nx)
-        dy1 = self.Ly/float(self.Ny)
+        ptsx = [0.0, 0.25, 0.5, 0.75, 1.0]
+        ptsy = [5.0, 5.0, 2.0, 1.0, 0.0]
+        self.dx = gg.bezier_spacing(self.Nx, self.Lx, ptsx, ptsy)
+        self.dy = gg.bezier_spacing(self.Ny, self.Ly, ptsx, ptsy)
         
-        dx_ = (2.0*(self.Lx-self.Nx*dx1))/(self.Nx*(self.Nx-1))
-        dy_ = (2.0*(self.Ly-self.Ny*dy1))/(self.Ny*(self.Ny-1))
-        
-        self.dx = zeros((self.Nx),dtype=float64)
-        self.dy = zeros((self.Ny),dtype=float64)
-        
-        for i in range(self.Nx):
-            self.dx[i] = dx1 + i*dx_
-            
-        for i in range(self.Ny):
-            self.dy[i] = dy1 + i*dy_
-        
+        ##########################
+        ## X and Y arrays - coordinates
+        self.X, self.Y = gg.get_XY(self.dx, self.dy)
         
         ##########################
         ## setup circle
@@ -95,20 +88,15 @@ class Setup:
         
         x_ = -self.dx[0]/2.0
         
-        self.X = zeros((self.Nx),dtype=float64)
-        self.Y = zeros((self.Ny),dtype=float64)
-        
         for x in range(self.Nx):
             x_ += self.dx[x]
             y_ = -self.dy[0]/2.0
-            self.X[x] = x_
             for y in range(self.Ny):
                 y_ += self.dy[y]
                 B[x,y] = linalg.norm([x_,y_])
                 self.Y[y] = y_
                 if B[x,y] < r:
                     self.bnd[x,y] = 1
-                    
         
         #add solid block
         #midX = floor(self.Nx/2)
