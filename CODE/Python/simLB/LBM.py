@@ -102,8 +102,21 @@ class ClassLBM:
         
         self.R = simSetup.R       #gas constant J/kgK
         self.gamma = simSetup.gamma      # ratio of specific heats
-        self.mu = simSetup.mu    #dynamic viscosity
         self.Pr = simSetup.Pr       #Prandtl number
+        
+        #viscosity model
+        self.mu_model = simSetup.mu_model
+        if self.mu_model == 'constant':
+            self.mu = simSetup.mu    #dynamic viscosity
+        elif self.mu_model == 'VHS':
+            self.mu_ref = simSetup.mu_ref
+            self.upsilon = simSetup.upsilon
+            self.T_ref = simSetup.T_ref
+        elif self.mu_model == 'sutherland':
+            self.mu_ref = simSetup.mu_ref
+            self.T_ref = simSetup.T_ref
+            self.S_v = simSetup.S_v
+        
         
         self.RKMETHOD = simSetup.RKMETHOD
         self.FMETHOD = simSetup.FMETHOD
@@ -119,10 +132,10 @@ class ClassLBM:
         self.mirrorSouth = simSetup.mirrorSouth
         self.mirrorEast  = simSetup.mirrorEast
         self.mirrorWest = simSetup.mirrorWest
-        self.rho_ref = simSetup.rho_ref
-        self.T_ref = simSetup.T_ref
-        self.S_v = simSetup.S_v
-        self.Tc_Tref = simSetup.Tc_Tref
+        self.ref_rho = simSetup.ref_rho
+        self.ref_T = simSetup.ref_T
+        self.ref_mu = simSetup.ref_mu
+        self.Tc = simSetup.Tc
         self.nPrintOut = simSetup.nPrintOut
         self.isSolid = simSetup.isSolid
         self.saveData = simSetup.saveData
@@ -186,9 +199,8 @@ class ClassLBM:
         self.K = self.b - self.D       # number of D.o.F to solve for
         
         # reference values
-        self.Tc = self.Tc_Tref*self.T_ref      # characteristic temperature, K
-        self.tau_ref = self.mu/(self.R*self.rho_ref*self.T_ref)      # reference relaxation time
-        self.u_ref = sqrt(self.R * self.T_ref)  #reference velocity
+        self.tau_ref = self.ref_mu/(self.R*self.ref_rho*self.ref_T)      # reference relaxation time
+        self.u_ref = sqrt(self.R * self.ref_T)  #reference velocity
         self.t_ref = max(self.Lx,self.Ly)/self.u_ref    # reference time
         
         # simulation variables
@@ -200,7 +212,7 @@ class ClassLBM:
         
         # stability requirements
         
-        if self.dt == 0:
+        if self.dtau == 0:
             self.dt = self.CFL * min(np.min(self.dx), np.min(self.dy)) / np.max(self.ex)
         else:
             self.dt = self.dtau * self.tau_ref
@@ -337,13 +349,22 @@ class ClassLBM:
                  'periodicY':self.periodicY,'mirrorN':self.mirrorNorth,\
                  'mirrorS':self.mirrorSouth,'mirrorE':self.mirrorEast,\
                  'mirrorW':self.mirrorWest,'FMETHOD':self.FMETHOD,\
-                 'mu':self.mu,'Pr':self.Pr,'isSolid':self.isSolid,\
-                 'RKMETHOD':self.RKMETHOD,'S_v':self.S_v,'T_ref':self.T_ref}
+                 'Pr':self.Pr,'isSolid':self.isSolid,\
+                 'RKMETHOD':self.RKMETHOD}
+        
+        if self.mu_model == 'constant':
+            viscosity = {'model':self.mu_model,'mu':self.mu}
+        elif self.mu_model == 'VHS':
+            viscosity = {'model':self.mu_model,'T_ref':self.T_ref,\
+                         'mu_ref':self.mu_ref,'upsilon':self.upsilon}
+        elif self.mu_model == 'sutherland':
+            viscosity = {'model':self.mu_model,'T_ref':self.T_ref,\
+                         'mu_ref':self.mu_ref,'S_v':self.S_v}
         
         ##########################
         ## GENERATE ENTIRE OPENCL CODE HERE
         import codeCL
-        name = codeCL.genOpenCL(input,self.ex, self.ey, self.dx, self.dy)
+        name = codeCL.genOpenCL(input, viscosity ,self.ex, self.ey, self.dx, self.dy)
         f = open(name,'r')
         fstr = "".join(f.readlines())
         f.close()

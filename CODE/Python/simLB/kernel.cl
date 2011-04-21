@@ -31,33 +31,33 @@
 //CONSTANTS 
 /////////////////////////////////////////
 
-#define Nx 50
-#define Ny 50
+#define Nx 100
+#define Ny 10
 #define Ni 13 
 
-__constant double mu = 1.86e-05;
-__constant double S_v = 110.4;
+__constant double mu_ref = 2.117e-05;
 __constant double T_ref = 273.0;
-__constant double Pr = 0.71;
+__constant double upsilon = 0.166666666667;
+__constant double Pr = 0.72;
 __constant double R = 287.0;
-__constant double K = 3.0;
-__constant double b = 5.0;
-__constant double Tc = 546.0;
+__constant double K = 1.0;
+__constant double b = 3.0;
+__constant double Tc = 4800.0;
 
-__constant double dt = 1.71171804795e-06;
+__constant double dt = 3.28900277599e-12;
 
 __constant int periodicX = 0;
 __constant int periodicY = 0;
-__constant int mirrorN = 1;
-__constant int mirrorS = 1;
-__constant int mirrorE = 1;
-__constant int mirrorW = 1;
+__constant int mirrorN = 0;
+__constant int mirrorS = 0;
+__constant int mirrorE = 0;
+__constant int mirrorW = 0;
 
-__constant double ex[13] = {0.0, 395.856034437, 0.0, -395.856034437, 0.0, 395.856034437, -395.856034437, -395.856034437, 395.856034437, 791.712068874, 0.0, -791.712068874, 0.0};
-__constant double ey[13] = {0.0, 0.0, 395.856034437, 0.0, -395.856034437, 395.856034437, 395.856034437, -395.856034437, -395.856034437, 0.0, 791.712068874, 0.0, -791.712068874};
+__constant double ex[13] = {0.0, 1173.71206009, 0.0, -1173.71206009, 0.0, 1173.71206009, -1173.71206009, -1173.71206009, 1173.71206009, 2347.42412018, 0.0, -2347.42412018, 0.0};
+__constant double ey[13] = {0.0, 0.0, 1173.71206009, 0.0, -1173.71206009, 1173.71206009, 1173.71206009, -1173.71206009, -1173.71206009, 0.0, 2347.42412018, 0.0, -2347.42412018};
 
-__constant double dx[50] = {0.00451729279024, 0.00452281672745, 0.00453896404068, 0.00456521254653, 0.00460117298068, 0.00464656899325, 0.00470122169626, 0.00476503770492, 0.00483799989381, 0.0049201602892, 0.00501163466327, 0.0051125985021, 0.00522328409792, 0.00534397857585, 0.00547502271043, 0.00561681042372, 0.00576978888536, 0.00593445915971, 0.00611137736759, 0.00630115635099, 0.00650446785143, 0.00672204523666, 0.00695468683906, 0.00720326000317, 0.0074687059832, 0.00775204588556, 0.00805438792151, 0.0083769363246, 0.00872100240366, 0.00908801835187, 0.00947955462666, 0.0098973419677, 0.0103432994496, 0.0108195703982, 0.0113285685695, 0.0118730377552, 0.0124561290028, 0.01308150105, 0.0137534515246, 0.0144770892237, 0.0152585617593, 0.0161053586894, 0.0170267189786, 0.0180341849899, 0.0191423661071, 0.020370008604, 0.0217415236019, 0.0232892186689, 0.0250566430909, 0.0271037567414};
-__constant double dy[50] = {0.00451729279024, 0.00452281672745, 0.00453896404068, 0.00456521254653, 0.00460117298068, 0.00464656899325, 0.00470122169626, 0.00476503770492, 0.00483799989381, 0.0049201602892, 0.00501163466327, 0.0051125985021, 0.00522328409792, 0.00534397857585, 0.00547502271043, 0.00561681042372, 0.00576978888536, 0.00593445915971, 0.00611137736759, 0.00630115635099, 0.00650446785143, 0.00672204523666, 0.00695468683906, 0.00720326000317, 0.0074687059832, 0.00775204588556, 0.00805438792151, 0.0083769363246, 0.00872100240366, 0.00908801835187, 0.00947955462666, 0.0098973419677, 0.0103432994496, 0.0108195703982, 0.0113285685695, 0.0118730377552, 0.0124561290028, 0.01308150105, 0.0137534515246, 0.0144770892237, 0.0152585617593, 0.0161053586894, 0.0170267189786, 0.0180341849899, 0.0191423661071, 0.020370008604, 0.0217415236019, 0.0232892186689, 0.0250566430909, 0.0271037567414};
+__constant double dx[100] = {2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08, 2.57356148257e-08};
+__constant double dy[10] = {2.57356148257e-07, 2.57356148257e-07, 2.57356148257e-07, 2.57356148257e-07, 2.57356148257e-07, 2.57356148257e-07, 2.57356148257e-07, 2.57356148257e-07, 2.57356148257e-07, 2.57356148257e-07};
 
 __constant unsigned int mirrorNS[13] = {0,1,4,3,2,8,7,6,5,9,12,11,10};
 __constant unsigned int mirrorEW[13] = {0,3,2,1,4,6,5,8,7,11,10,9,12};
@@ -152,8 +152,8 @@ int clEq2D(double rho, double u_, double v_, double T_, double* eqf, double* eqh
     //returns the equilibrium values for each velocity vector given the current
     // macroscopic values and the corresponding reference quantities
 
-    double u = u_/395.856034437;
-    double v = v_/395.856034437;
+    double u = u_/1173.71206009;
+    double v = v_/1173.71206009;
     double T = T_/Tc;
 
     eqf[0] = f0(rho,u,v,T);
@@ -170,7 +170,7 @@ int clEq2D(double rho, double u_, double v_, double T_, double* eqf, double* eqh
     eqf[11] = f9(rho,-u,v,T);
     eqf[12] = f9(rho,-v,u,T);
 
-    double rRTc = rho*156702.0;
+    double rRTc = rho*1377600.0;
 
     eqh[0] = rRTc*h0(T,u,v)/24.0;
     eqh[1] = rRTc*h1(T,u,v)/12.0;
@@ -246,22 +246,18 @@ clIndex(int i, int pm, int d, int* mir)
 
     if (d == 0) {
         if (i < 0) {
-               i = -i - 1;
-               (*mir) = 1;
+               i = 0; //zeroth order extrapolation
         }
         else if (i > Nx - 1) {
-                i = 2*Nx - i - 1;
-                (*mir) = 1;
+                i = Nx - 1; //zeroth order extrapolation
         }
     }
     else if (d == 1) {
         if (i < 0) {
-                i = -i - 1;
-                (*mir) = 1;
+                i = 0; //zeroth order extrapolation
         }
         else if (i > Ny - 1) {
-                i = 2*Ny - i - 1;
-                (*mir) = 1;
+            i = Ny - 1; //zeroth order extrapolation
         }
     }
     return i;
@@ -871,8 +867,8 @@ RK3_STEP1(__global double* f_G,
     double T = T_G(ix,iy);
 
     // calculate relaxation times from macroscopic properties
-    double mu_ = mu*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));
-    double tauf = mu_/(rho*R*T);
+    double mu = mu_ref*powr(T/T_ref,(0.5+upsilon));
+    double tauf = mu/(rho*R*T);
     double tauh = tauf/Pr;
     double tauhf = (tauh*tauf)/(tauf - tauh);
 
@@ -946,8 +942,8 @@ RK3_STEP2(__global double* f_G,
     double T = T_G(ix,iy);
 
     // calculate relaxation times from macroscopic properties
-    double mu_ = mu*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));
-    double tauf = mu_/(rho*R*T);
+    double mu = mu_ref*powr(T/T_ref,(0.5+upsilon));
+    double tauf = mu/(rho*R*T);
     double tauh = tauf/Pr;
     double tauhf = (tauh*tauf)/(tauf - tauh);
 
@@ -1037,13 +1033,13 @@ RK3_STEP3(__global double* f_G,
     double T3 =   T_3(ix,iy);
 
     // calculate relaxation times from macroscopic properties
-    double mu_ = mu*powr(T2/T_ref,3.0/2.0)*((T_ref+S_v)/(T2 + S_v));
-    double tauf2 = mu_/(rho2*R*T2);
+    double mu = mu_ref*powr(T2/T_ref,(0.5+upsilon));
+    double tauf2 = mu/(rho2*R*T2);
     double tauh2 = tauf2/Pr;
     double tauhf2 = (tauh2*tauf2)/(tauf2 - tauh2);
 
-    mu_ = mu*powr(T3/T_ref,3.0/2.0)*((T_ref+S_v)/(T3 + S_v));
-    double tauf3 = mu_/(rho3*R*T3);
+    mu = mu_ref*powr(T3/T_ref,(0.5+upsilon));
+    double tauf3 = mu/(rho3*R*T3);
     double tauh3 = tauf3/Pr;
     double tauhf3 = (tauh3*tauf3)/(tauf3 - tauh3);
     double feq2[Ni];
@@ -1137,14 +1133,13 @@ RK3_COMBINE(__global double* f_G,
     double uy3 =  UY_3(ix,iy);
     double T3 =   T_3(ix,iy);
 
-    // calculate relaxation times from macroscopic properties
-    double mu_ = mu*powr(T2/T_ref,3.0/2.0)*((T_ref+S_v)/(T2 + S_v));
-    double tauf2 = mu_/(rho2*R*T2);
+    double mu = mu_ref*powr(T2/T_ref,(0.5+upsilon));
+    double tauf2 = mu/(rho2*R*T2);
     double tauh2 = tauf2/Pr;
     double tauhf2 = (tauh2*tauf2)/(tauf2 - tauh2);
 
-    mu_ = mu*powr(T3/T_ref,3.0/2.0)*((T_ref+S_v)/(T3 + S_v));
-    double tauf3 = mu_/(rho3*R*T3);
+    mu = mu_ref*powr(T3/T_ref,(0.5+upsilon));
+    double tauf3 = mu/(rho3*R*T3);
     double tauh3 = tauf3/Pr;
     double tauhf3 = (tauh3*tauf3)/(tauf3 - tauh3);
     double feq2[Ni];

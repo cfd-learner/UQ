@@ -22,11 +22,11 @@ class Setup:
     
     RKMETHOD = 1
     FMETHOD = 1
-    CFL = 0.6
+    CFL = 0.3
     dtau = 0.0
     tt_tref = 0.0
     tt_time = 0
-    steps = 1000
+    steps = 100
     tol = 0.0
     periodicX = 0
     periodicY = 0
@@ -35,10 +35,10 @@ class Setup:
     mirrorEast  = 0
     mirrorWest = 0
     
-    nPrintOut = 100
+    nPrintOut = 10
     saveData = 0
     
-    mu_model = 'GHS'    #GHS, sutherland, const
+    mu_model = 'VHS'    #GHS, sutherland, const, VHS
     if mu_model == 'sutherland':
         T_ref = 293.0
         S_v = 110.4
@@ -49,39 +49,54 @@ class Setup:
         #gas props
         m = 66.3e-27    #kg
         sigma0 = 6.457e-19  #m^2
-        mu0 = 2.272e-5  #N/ms
+        mu_ref = 2.272e-5  #N/ms
         T_ref = 300 #K
+    elif mu_model == 'VHS':
+        T_ref = 273.0   #K
+        mu_ref = 2.117e-5  #Ns/m**2 Appendix A: Bird
+        upsilon = 1.0/6.0
     
     def initialise(self):
         ##########################
         ## domain definition
         
         # GAS PROPERTIES 1
+        rho1 = 1.0
         T1 = 150.0
-        mu1 = 1.237e-5
+        p1 = rho1*self.R*T1
+        mu1 = self.mu_ref*(T1/self.T_ref)**(0.5 + self.upsilon)
         M1 = 4.0
+        a1 = sqrt(self.gamma*self.R*T1)
+        ux1 = M1*a1
+        uy1 = 0.0
         
         # GAS PROPERTIES 2
-        T2 = T1*((2.0+(gamma-1.0)*M1**2)*((2*gamma*M1**2-(gamma-1.0))/((gamma+1.0)**2*M1**2)))
-        
-        g0 = (4.0*self.R*self.T_ref)**0.5
-        S = S0*(T_ref/T2)**(ups2-ups1)
-        
-        mu2 = 
+        rho2 = rho1*((self.gamma + 1.0)*M1**2)/((self.gamma - 1.0)*M1**2+2.0)
+        T2 = T1*((2.0+(self.gamma-1.0)*M1**2)*((2*self.gamma*M1**2-(self.gamma-1.0))/((self.gamma+1.0)**2*M1**2)))
+        p2 = rho2*self.R*T2
+        mu2 = self.mu_ref*(T2/self.T_ref)**(0.5 + self.upsilon)
+        M2 = sqrt(((self.gamma-1.0)*M1**2+2.0)/(2*self.gamma*M1**2-(self.gamma-1.0)))
+        a2 = sqrt(self.gamma*self.R*T2)
+        ux2 = M2*a2
+        uy2 = 0.0
         
         # mean free path
-        lambda1 = (2.0*mu)/(rho0*sqrt((8*R*T0)/pi))
+        lambda1 = (2.0*mu1)/(rho1*sqrt((8.0*self.R*T1)/pi))
         
         self.Nx = 100     #number of elements in X
-        self.Ny = 2    #number of elements in Y
+        self.Ny = 10    #number of elements in Y
         
-        self.Lx = 1.0    #length of domain in X
-        self.Ly = 0.68 #length of domain in y
+        m = 30.0    #multiplier of mean free path
         
-        ptsx = [0.0, 0.25, 0.5, 0.75, 1.0]
-        ptsy = [10.0, 5.0, 2.0, 1.0, 0.0]
-        self.dx = gg.bezier_spacing(self.Nx, self.Lx, ptsx, ptsy)
-        self.dy = gg.bezier_spacing(self.Ny, self.Ly, ptsx, ptsy)
+        self.Lx = m*lambda1    #length of domain in X
+        self.Ly = self.Lx #length of domain in y
+        
+        ptsxX = [0.0, 1.0]
+        ptsyX = [0.0, 0.0]
+        self.dx = gg.bezier_spacing(self.Nx, self.Lx, ptsxX, ptsyX)
+        ptsxY = [0.0, 1.0]
+        ptsyY = [0.0, 0.0]
+        self.dy = gg.bezier_spacing(self.Ny, self.Ly, ptsxY, ptsyY)
         
         ##########################
         ## X and Y arrays - coordinates
@@ -92,35 +107,29 @@ class Setup:
         
         self.bnd = zeros((self.Nx, self.Ny),dtype=uint32)
         
-        #inlet & top boundary
-        self.bnd[0,1:self.Ny] = 1
-        self.bnd[0:self.Nx, self.Ny-1] = 1
+        midX = int(self.Nx/2.0)
         
-        #wall
-        self.bnd[0:self.Nx,0] = 2
+        #inlet
+        self.bnd[0,:] = 0
         
-        ## VALUES FOR FLUID
+        #zone 1
+        self.bnd[1:midX,:] = 1
         
-        Re = 1.65e6
+        #zone 2
+        self.bnd[midX:-1,:] = 2
         
-        rho0 = 0.0404
-        T0 = 222.0
-        p0 = rho0*self.R*T0
-        ux0 = 2.0*sqrt(self.gamma*self.R*T0)
-        uy0 = 0.0
-        
-        self.mu = (rho0*ux0*self.Lx)/Re
-        
+        #outlet
+        self.bnd[-1,:] = 3
         
         
         ##########################
         ## SIMULATION LISTS
-        self.numProps = 3
-        self.density =   array([rho0, rho0, rho0],dtype=float64)
-        self.therm =      array([T0, T0, T0],dtype=float64)
-        self.velX = array([ux0, ux0, 0.0],dtype=float64)
-        self.velY = array([uy0, uy0, 0.0],dtype=float64)
-        self.cell =  array([0, 1, 2],dtype=uint32)
+        self.numProps = 4
+        self.density =   array([rho1, rho1, rho2, rho2],dtype=float64)
+        self.therm =      array([T1, T1, T2, T2],dtype=float64)
+        self.velX = array([ux1, ux1, ux2, ux2],dtype=float64)
+        self.velY = array([uy1, uy1, uy2, uy2],dtype=float64)
+        self.cell =  array([1,0,0,1],dtype=uint32)
         
         if where(self.cell == 2):
             self.isSolid = 1
@@ -130,9 +139,12 @@ class Setup:
         ##########################
         ## REFERENCE QUANTITIES
         
-        self.rho_ref = rho0
+        self.ref_rho = rho1
+        self.ref_T = T1
+        self.ref_mu = mu1
+        
         maxVel = sqrt(max(abs(self.velX))**2 + max(abs(self.velY))**2)
-        self.Tc_Tref = (T0/self.T_ref)*(1.0 + (self.gamma - 1.0)/2.0)*(ux0/sqrt(self.gamma*self.R*T0))**2
-        print('Tc_Tref = {}'.format(self.Tc_Tref))
+        self.Tc = 1.5*T1*(1.0 + (self.gamma - 1.0)/2.0)*(ux1/sqrt(self.gamma*self.R*T1))**2   #stagnation temp
+        print('Tc = {}K'.format(self.Tc))
         
 # END

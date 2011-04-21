@@ -7,7 +7,7 @@ script for writing OpenCL for the initialisation of all dist. functions
 import string
 from math import sqrt
 
-def genOpenCL(input,ex,ey,dx,dy):
+def genOpenCL(input, viscosity, ex, ey, dx, dy):
     """
     write all OpenCL code
     return name of file containing OpenCL code
@@ -55,9 +55,19 @@ def genOpenCL(input,ex,ey,dx,dy):
     f.write('#define Nx {}\n'.format(input['Nx']))
     f.write('#define Ny {}\n'.format(input['Ny']))
     f.write('#define Ni {} \n\n'.format(input['Ni']))
-    f.write('__constant double mu = {};\n'.format(input['mu']))
-    f.write('__constant double S_v = {};\n'.format(input['S_v']))
-    f.write('__constant double T_ref = {};\n'.format(input['T_ref']))
+    
+    # viscosity model
+    if viscosity['model'] == 'constant':
+        f.write('__constant double mu = {};\n'.format(viscosity['mu']))
+    elif viscosity['model'] == 'VHS':
+        f.write('__constant double mu_ref = {};\n'.format(viscosity['mu_ref']))
+        f.write('__constant double T_ref = {};\n'.format(viscosity['T_ref']))
+        f.write('__constant double upsilon = {};\n'.format(viscosity['upsilon']))
+    elif viscosity['model'] == 'sutherland':
+        f.write('__constant double mu_ref = {};\n'.format(viscosity['mu_ref']))
+        f.write('__constant double T_ref = {};\n'.format(viscosity['T_ref']))
+        f.write('__constant double S_v = {};\n'.format(viscosity['S_v']))
+        
     f.write('__constant double Pr = {};\n'.format(input['Pr']))
     f.write('__constant double R = {};\n'.format(input['R']))
     f.write('__constant double K = {};\n'.format(input['K']))
@@ -972,8 +982,14 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('    }\n')
         f.write('    else {\n')
         f.write('        // calculate relaxation times from macroscopic properties\n')
-        f.write('        double mu_ = mu*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));\n')
-        f.write('        double tauf = mu_/(rho*R*T);\n')
+        
+        # viscosity model
+        if viscosity['model'] == 'VHS':
+            f.write('        double mu = mu_ref*powr(T/T_ref,(0.5+upsilon));\n')
+        elif viscosity['model'] == 'sutherland':
+            f.write('        double mu = mu_ref*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));\n')
+        
+        f.write('        double tauf = mu/(rho*R*T);\n')
         f.write('        double tauh = tauf/Pr;\n')
         f.write('        double tauhf = (tauh*tauf)/(tauf - tauh);\n\n')
         f.write('        clEq2D(rho, ux, uy, T, feq, heq);\n\n')
@@ -1023,8 +1039,14 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('    double uy = UY_G(ix,iy);\n')
         f.write('    double T = T_G(ix,iy);\n\n')
         f.write('    // calculate relaxation times from macroscopic properties\n')
-        f.write('    double mu_ = mu*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));\n')
-        f.write('    double tauf = mu_/(rho*R*T);\n')
+        
+        # viscosity model
+        if viscosity['model'] == 'VHS':
+            f.write('        double mu = mu_ref*powr(T/T_ref,(0.5+upsilon));\n')
+        elif viscosity['model'] == 'sutherland':
+            f.write('        double mu = mu_ref*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));\n')
+        
+        f.write('    double tauf = mu/(rho*R*T);\n')
         f.write('    double tauh = tauf/Pr;\n')
         f.write('    double tauhf = (tauh*tauf)/(tauf - tauh);\n\n')
         f.write('    double feq[Ni];\n')
@@ -1084,8 +1106,14 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('    double uy = UY_G(ix,iy);\n')
         f.write('    double T = T_G(ix,iy);\n\n')
         f.write('    // calculate relaxation times from macroscopic properties\n')
-        f.write('    double mu_ = mu*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));\n')
-        f.write('    double tauf = mu_/(rho*R*T);\n')
+        
+        # viscosity model
+        if viscosity['model'] == 'VHS':
+            f.write('    double mu = mu_ref*powr(T/T_ref,(0.5+upsilon));\n')
+        elif viscosity['model'] == 'sutherland':
+            f.write('    double mu = mu_ref*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));\n')
+        
+        f.write('    double tauf = mu/(rho*R*T);\n')
         f.write('    double tauh = tauf/Pr;\n')
         f.write('    double tauhf = (tauh*tauf)/(tauf - tauh);\n\n')
         f.write('    double feq[Ni];\n')
@@ -1150,8 +1178,14 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('    double uy = UY_G(ix,iy);\n')
         f.write('    double T = T_G(ix,iy);\n\n')
         f.write('    // calculate relaxation times from macroscopic properties\n')
-        f.write('    double mu_ = mu*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));\n')
-        f.write('    double tauf = mu_/(rho*R*T);\n')
+        
+        # viscosity model
+        if viscosity['model'] == 'VHS':
+            f.write('    double mu = mu_ref*powr(T/T_ref,(0.5+upsilon));\n')
+        elif viscosity['model'] == 'sutherland':
+            f.write('    double mu = mu_ref*powr(T/T_ref,3.0/2.0)*((T_ref+S_v)/(T + S_v));\n')
+        
+        f.write('    double tauf = mu/(rho*R*T);\n')
         f.write('    double tauh = tauf/Pr;\n')
         f.write('    double tauhf = (tauh*tauf)/(tauf - tauh);\n\n')
         f.write('    double feq[Ni];\n')
@@ -1235,13 +1269,24 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('    double T3 =   T_3(ix,iy);\n\n')
         
         f.write('    // calculate relaxation times from macroscopic properties\n')
-        f.write('    double mu_ = mu*powr(T2/T_ref,3.0/2.0)*((T_ref+S_v)/(T2 + S_v));\n')
-        f.write('    double tauf2 = mu_/(rho2*R*T2);\n')
+        
+        # viscosity model
+        if viscosity['model'] == 'VHS':
+            f.write('    double mu = mu_ref*powr(T2/T_ref,(0.5+upsilon));\n')
+        elif viscosity['model'] == 'sutherland':
+            f.write('    double mu = mu_ref*powr(T2/T_ref,3.0/2.0)*((T_ref+S_v)/(T2 + S_v));\n')
+        
+        f.write('    double tauf2 = mu/(rho2*R*T2);\n')
         f.write('    double tauh2 = tauf2/Pr;\n')
         f.write('    double tauhf2 = (tauh2*tauf2)/(tauf2 - tauh2);\n\n')
         
-        f.write('    mu_ = mu*powr(T3/T_ref,3.0/2.0)*((T_ref+S_v)/(T3 + S_v));\n')
-        f.write('    double tauf3 = mu_/(rho3*R*T3);\n')
+        # viscosity model
+        if viscosity['model'] == 'VHS':
+            f.write('    mu = mu_ref*powr(T3/T_ref,(0.5+upsilon));\n')
+        elif viscosity['model'] == 'sutherland':
+            f.write('    mu = mu_ref*powr(T3/T_ref,3.0/2.0)*((T_ref+S_v)/(T3 + S_v));\n')
+        
+        f.write('    double tauf3 = mu/(rho3*R*T3);\n')
         f.write('    double tauh3 = tauf3/Pr;\n')
         f.write('    double tauhf3 = (tauh3*tauf3)/(tauf3 - tauh3);\n')
         
@@ -1330,14 +1375,23 @@ def genOpenCL(input,ex,ey,dx,dy):
         f.write('    double uy3 =  UY_3(ix,iy);\n')
         f.write('    double T3 =   T_3(ix,iy);\n\n')
         
-        f.write('    // calculate relaxation times from macroscopic properties\n')
-        f.write('    double mu_ = mu*powr(T2/T_ref,3.0/2.0)*((T_ref+S_v)/(T2 + S_v));\n')
-        f.write('    double tauf2 = mu_/(rho2*R*T2);\n')
+        # viscosity model
+        if viscosity['model'] == 'VHS':
+            f.write('    double mu = mu_ref*powr(T2/T_ref,(0.5+upsilon));\n')
+        elif viscosity['model'] == 'sutherland':
+            f.write('    double mu = mu_ref*powr(T2/T_ref,3.0/2.0)*((T_ref+S_v)/(T2 + S_v));\n')
+        
+        f.write('    double tauf2 = mu/(rho2*R*T2);\n')
         f.write('    double tauh2 = tauf2/Pr;\n')
         f.write('    double tauhf2 = (tauh2*tauf2)/(tauf2 - tauh2);\n\n')
         
-        f.write('    mu_ = mu*powr(T3/T_ref,3.0/2.0)*((T_ref+S_v)/(T3 + S_v));\n')
-        f.write('    double tauf3 = mu_/(rho3*R*T3);\n')
+        # viscosity model
+        if viscosity['model'] == 'VHS':
+            f.write('    mu = mu_ref*powr(T3/T_ref,(0.5+upsilon));\n')
+        elif viscosity['model'] == 'sutherland':
+            f.write('    mu = mu_ref*powr(T3/T_ref,3.0/2.0)*((T_ref+S_v)/(T3 + S_v));\n')
+        
+        f.write('    double tauf3 = mu/(rho3*R*T3);\n')
         f.write('    double tauh3 = tauf3/Pr;\n')
         f.write('    double tauhf3 = (tauh3*tauf3)/(tauf3 - tauh3);\n')
         

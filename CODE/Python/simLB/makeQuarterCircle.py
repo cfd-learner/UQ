@@ -15,7 +15,6 @@ class Setup:
     
     R = 287.0       #gas constant J/kgK
     gamma = 1.4      # ratio of specific heats
-    mu = 1.86e-5    #dynamic viscosity
     Pr = 0.71       #Prandtl number
     
     RKMETHOD = 1
@@ -32,13 +31,28 @@ class Setup:
     mirrorSouth = 1
     mirrorEast  = 1
     mirrorWest = 1
-    rho_ref = 0.0
-    p_ref = 0.0
-    T_ref = 0.0
-    S_v = 110.4
-    Tc_Tref = 2.0
+    
     nPrintOut = 50
     saveData = 0
+    
+    mu_model = 'VHS'    #GHS, sutherland, const, VHS
+    if mu_model == 'sutherland':
+        mu_ref = 1.71e-5
+        T_ref = 273.0
+        S_v = 110.4
+    elif mu_model == 'GHS':
+        ups1 = 2.0/13.0
+        ups2 = 14.0/13.0
+        phi = 0.61
+        #gas props
+        m = 66.3e-27    #kg
+        sigma0 = 6.457e-19  #m^2
+        mu_ref = 2.272e-5  #N/ms
+        T_ref = 300 #K
+    elif mu_model == 'VHS':
+        T_ref = 273.0   #K
+        mu_ref = 1.71e-5  #Ns/m**2 Appendix A: Bird
+        upsilon = 1.0/6.0
     
     ##########################
     ## LISTS
@@ -109,6 +123,7 @@ class Setup:
         rho0 = 1.165
         p0 = 101310.0
         T0 = p0/(rho0*self.R);
+        u0 = sqrt(self.gamma*self.R*T0)
         
         rhoL = rho0
         TL = 303.0
@@ -138,8 +153,14 @@ class Setup:
         ##########################
         ## REFERENCE QUANTITIES
         
-        self.rho_ref = rho0
-        self.T_ref = 273.0
-        self.p_ref = self.rho_ref*self.R*self.T_ref;
+        self.ref_rho = rho0
+        self.ref_T = T0
+        if self.mu_model == 'sutherland':
+            self.ref_mu = self.mu_ref*(T0/self.T_ref)**(3.0/2.0)*((self.T_ref+self.S_v)/(T0 + self.S_v))
+        if self.mu_model == 'VHS':
+            self.ref_mu = self.mu_ref*(T0/self.T_ref)**(0.5 + self.upsilon)
+        
+        self.Tc = T0*(1.0 + (self.gamma - 1.0)/2.0)*(u0/sqrt(self.gamma*self.R*T0))**2   #stagnation temp
+        print('Tc = {}K'.format(self.Tc))
         
 # END
